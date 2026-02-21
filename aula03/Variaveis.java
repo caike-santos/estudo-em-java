@@ -44,10 +44,10 @@ public class Variaveis {
 
         switch (cod) {
             case 1:
-                System.out.println("Voce pediu " + quant + " Arroz com batata, o preço do(s) prato(s) ficou " + preco + " Reais e foi adicionada uma taxa de serviço de " + taxa + "Reais totalizando: " + precoFinal + " Reais, Obrigado volte sempre!");
+                System.out.printf("Voce pediu  %d  Arroz com batata, o preço do(s) prato(s) ficou  %.2f Reais e foi adicionada uma taxa de serviço de %.2f Reais totalizando: %.2f Reais, Obrigado volte sempre!\n", quant, preco, taxa, precoFinal);
                 break;
             case 2:
-                System.out.println("Voce pediu " + quant + " Feijoada com carne, o preço do(s) prato(s) ficou " + preco + " Reais e foi adicionada uma taxa de serviço de " + taxa + "Reais totalizando: " + precoFinal + " Reais, Obrigado volte sempre!");
+                System.out.printf("Voce pediu  %d  Feijoada, o preço do(s) prato(s) ficou  %.2f Reais e foi adicionada uma taxa de serviço de %.2f Reais totalizando: %.2f Reais, Obrigado volte sempre!\n", quant, preco, taxa, precoFinal);
                 break;
             default:
                 break;
