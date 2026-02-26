@@ -1,10 +1,10 @@
-package aula09;
+package aula10;
 import java.util.ArrayList;
 
-import aula10.Prato;
+
 public class Comanda {
     private int mesa;
-    private ArrayList<Prato> pedidos;
+    private ArrayList<ItemMenu> pedidos;
 
     public Comanda(int m){
         this.mesa = m;
@@ -17,21 +17,21 @@ public class Comanda {
     public int getMesa() {
         return mesa;
     }
-    public void setPedidos(ArrayList<Prato> pedidos) {
+    public void setPedidos(ArrayList<ItemMenu> pedidos) {
         this.pedidos = pedidos;
     }
-    public ArrayList<Prato> getPedidos() {
+    public ArrayList<ItemMenu> getPedidos() {
         return pedidos;
     }
 
-    public void adicionarPrato(Prato p){
-        pedidos.add(p);
-        System.out.println(p.getNome() + " foi adicionado à comanda da mesa "+ getMesa());
+    public void adicionarItem(ItemMenu i){
+        pedidos.add(i);
+        System.out.println(i.getNome() + " foi adicionado à comanda da mesa "+ getMesa());
     }
 
     public double calcularPreço(){
         double precoFinal = 0.0;
-        for(Prato item : pedidos){
+        for(ItemMenu item : pedidos){
             precoFinal += item.getPreco();
         }
         return precoFinal;
@@ -39,10 +39,10 @@ public class Comanda {
 
     public void exibirRecibo(){
         System.out.println("---------Recibo---------");
-        for(Prato item : pedidos){
+        for(ItemMenu item : pedidos){
             item.exibirDetalhes();
         }
         System.out.println("------------------------");
-        System.out.println("Valor total: "+ calcularPreço());
+        System.out.printf("Valor total: R$ %.2f", calcularPreço());
     }
 }
