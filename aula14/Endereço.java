@@ -1,11 +1,11 @@
 package aula14;
 
 public class Endereço {
-    private String bairro;
-    private String rua;
-    private int numero;
-    private String cep;
-    private String complemento;
+    private String bairro = "null";
+    private String rua = "null";
+    private int numero = 0;
+    private String cep = "null";
+    private String complemento = "null";
 
     public Endereço(String bairro, String rua, int numero, String cep, String complemento){
         this.bairro = bairro;
@@ -45,6 +45,14 @@ public class Endereço {
     }
     public void setRua(String rua) {
         this.rua = rua;
+    }
+
+    public void exibeEndereço(){
+        System.out.println("Rua: " + getRua());
+        System.out.println("Bairro: " + getBairro());
+        System.out.println("Numero: " + getNumero());
+        System.out.println("Cep: " + getCep());
+        System.out.println("Complemento: " + getComplemento());
     }
 
     

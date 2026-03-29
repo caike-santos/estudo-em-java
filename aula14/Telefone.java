@@ -1,8 +1,8 @@
 package aula14;
 
 public class Telefone {
-    private String ddd;
-    private String numero;
+    private String ddd = "00";
+    private String numero = "00000-0000";
 
     public Telefone(String ddd, String numero){
         this.ddd = ddd;
@@ -20,6 +20,10 @@ public class Telefone {
     }
     public String getNumero() {
         return numero;
+    }
+
+    public void exibeTelefone(){
+        System.out.println("Telefone: (" + getDdd() + ") " + getNumero());
     }
     
 }
