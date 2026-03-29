@@ -1,6 +1,6 @@
 package aula14;
 
-public enum Serviços {
+public enum Servicos {
     Banho,
     Tosa,
     CheckUp,
