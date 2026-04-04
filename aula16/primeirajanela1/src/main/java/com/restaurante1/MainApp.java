@@ -4,11 +4,14 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -22,6 +25,9 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) {
         
+        Label lblTitulo = new Label("Cadastre seus pets na nossa veterinaria");
+        lblTitulo.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: darkred;");
+
         Label lblNome = new Label("Nome do pet:");
         TextField txtNome = new TextField();
         txtNome.setMaxWidth(250);
@@ -53,7 +59,15 @@ public class MainApp extends Application {
                 String idade = txtIdade.getText();
                 String raca = txtRaca.getText();
                 String sexo = cbmSexo.getValue();
-                System.out.println("nome: "+ nome);
+
+                if(nome.isEmpty() || idade.isEmpty() || raca.isEmpty() || sexo.isEmpty()){
+                    Alert aviso = new Alert(Alert.AlertType.WARNING);
+                    aviso.setTitle("Erro");
+                    aviso.setHeaderText("Erro de Preenchimento");
+                    aviso.setContentText("Preencha todos os campos");
+                    aviso.showAndWait();
+                }else{
+                    System.out.println("nome: "+ nome);
                 System.out.println("idade: "+ idade);
                 System.out.println("raca: "+ raca);
                 System.out.println("sexo: "+ sexo);
@@ -68,11 +82,46 @@ public class MainApp extends Application {
                 txtNome.clear();
                 txtRaca.clear();
                 
+                }
+                
         });
 
-        VBox vertical = new VBox(15);
+        Button btnFinalizar = new Button("Finalizar Cadastro");
 
-        vertical.getChildren().addAll(lblNome, txtNome, lblIdade, txtIdade, lblRaca, txtRaca, lblSexo, cbmSexo, btnCadastrar, cadastro);
+        btnFinalizar.setOnAction(evento -> {
+            String cadastroAtual = cadastro.getText();
+            if(cadastroAtual.isEmpty()){
+                Alert aviso = new Alert(Alert.AlertType.WARNING);
+                aviso.setTitle("Erro");
+                aviso.setHeaderText("Nenhum cadastro realizado");
+                aviso.setContentText("Faça pelo menos um cadastro para poder finalizado");
+                aviso.showAndWait();
+            }else{
+                Alert concluido = new Alert(Alert.AlertType.INFORMATION);
+                concluido.setTitle("Cadastro Finalizado");
+                concluido.setHeaderText("Imprimindo Cadastro");
+                concluido.setContentText("Seu pet foi cadastrado com Sucesso");
+                concluido.showAndWait();
+                cadastro.clear();
+            }
+        });
+
+        HBox linhaNome = new HBox(10);
+        HBox linhaIdade = new HBox(10);
+        HBox linhaRaca = new HBox(10);
+        HBox linhaSexo = new HBox(10); 
+        HBox linhaBtn = new HBox(10);
+
+        linhaNome.getChildren().addAll(lblNome, txtNome);
+        linhaIdade.getChildren().addAll(lblIdade, txtIdade);
+        linhaRaca.getChildren().addAll(lblRaca, txtRaca);
+        linhaSexo.getChildren().addAll(lblSexo, cbmSexo);
+        linhaBtn.getChildren().addAll(btnCadastrar, btnFinalizar);
+       
+
+        VBox vertical = new VBox(20);
+
+        vertical.getChildren().addAll(lblTitulo, linhaNome, linhaIdade, linhaRaca, linhaSexo, linhaBtn, cadastro);
 
         Scene scene = new Scene(vertical, 1000, 600);
 
