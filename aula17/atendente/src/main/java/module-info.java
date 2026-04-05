@@ -1,4 +1,4 @@
 module com.veterinaria {
-    requires javafx.controls;
+    requires transitive javafx.controls;
     exports com.veterinaria;
 }

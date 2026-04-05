@@ -1,7 +1,5 @@
 module com.restaurante1 {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires javafx.media;
-    opens com.restaurante1 to javafx.fxml;
+    requires transitive javafx.controls;
+    requires transitive javafx.media;
     exports com.restaurante1;
 }
