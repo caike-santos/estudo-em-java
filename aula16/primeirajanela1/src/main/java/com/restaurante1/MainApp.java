@@ -35,18 +35,12 @@ public class MainApp extends Application {
         visulogo.setFitHeight(60);
         visulogo.setPreserveRatio(true);
 
-        Label lblTitulo = new Label("Logue para se cadastrar");
+        Label lblTitulo = new Label("Logue para cadastrar seu pet");
         lblTitulo.getStyleClass().add("titulo");
         //lblTitulo.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: darkred;");
 
-        Button btnDeslogar = new Button("Deslogar");
-
-        btnDeslogar.setOnAction(evento -> {
-            stage.setTitle("Login");
-            stage.setScene(cenaLogin);
-            stage.show();
-        });
         
+        Button btnDeslogar = new Button("Deslogar");
 
         HBox headerLogin = new HBox(10);
         headerLogin.getChildren().addAll(visulogo, lblTitulo);
@@ -73,6 +67,16 @@ public class MainApp extends Application {
 
         HBox linhaLogar = new HBox(10);
         linhaLogar.getChildren().add(btnLogar);
+
+       
+
+        btnDeslogar.setOnAction(evento -> {
+            txtUsuario.clear();
+            txtSenha.clear();
+            stage.setTitle("Login");
+            stage.setScene(cenaLogin);
+            stage.show();
+        });
         //fimFormularioLogin
 
         //montandoCena
