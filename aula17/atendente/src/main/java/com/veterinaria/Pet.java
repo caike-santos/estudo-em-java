@@ -22,7 +22,7 @@ public class Pet {
         visulogoCadastro.setFitHeight(60);
         visulogoCadastro.setPreserveRatio(true);
 
-        Label lblTituloCadastro = new Label("Cadastre seus pets na nossa veterinaria");
+        Label lblTituloCadastro = new Label("Cadastro do Pet");
         lblTituloCadastro.getStyleClass().add("titulo");
 
          Button btnDeslogar = new Button("Deslogar");
