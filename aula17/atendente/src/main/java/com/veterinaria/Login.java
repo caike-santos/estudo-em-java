@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 public class Login{
     
     
-    public static Scene criarCena(){
+    public static Parent criarCena(){
         
         Image logo = new Image(Login.class.getResource("/imagens/pet.png").toExternalForm());
         ImageView mostarLogo = new ImageView(logo);
@@ -75,6 +75,6 @@ public class Login{
             
         });
 
-        return  new Scene(vertical, 1000, 600);
+        return vertical;
     }
 }
