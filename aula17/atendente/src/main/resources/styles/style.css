@@ -49,3 +49,6 @@
     -fx-font-size: 20px;  
     -fx-text-fill: darkred;
 }
+.btn_salvar{
+    -fx-padding-bottom: 20px;
+}

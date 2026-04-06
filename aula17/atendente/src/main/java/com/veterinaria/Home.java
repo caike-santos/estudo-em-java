@@ -24,17 +24,16 @@ public class Home {
         HBox linhaHeader = new HBox(10);
         linhaHeader.getChildren().addAll(mostarLogo, lblTitulo, btnDeslogar);
 
-        Label lblSubTitulo = new Label("Bem-Vindo(a) " + nomeAtendente + ", escolha o tipo de cadastro");
+        Label lblSubTitulo = new Label("Bem-Vindo(a) " + nomeAtendente + ", cadastre um novo cliente");
         lblSubTitulo.getStyleClass().add("subtitulo");
 
         HBox linhaSubTitulo = new HBox(10);
         linhaSubTitulo.getChildren().add(lblSubTitulo);
 
-        Button btnCliente = new Button("Cliente");
-        Button btnPet = new Button("Pet");
+        Button btnCadastro = new Button("Cadastrar");
 
         HBox linhabtn = new HBox(50);
-        linhabtn.getChildren().addAll(btnCliente, btnPet);
+        linhabtn.getChildren().add(btnCadastro);
 
         Arrays.asList(linhaHeader, linhaSubTitulo, linhabtn).forEach(linha -> linha.setAlignment(Pos.CENTER));
 
@@ -42,14 +41,11 @@ public class Home {
         verticalHome.getChildren().addAll(linhaHeader, linhaSubTitulo, linhabtn);
         verticalHome.setAlignment(Pos.CENTER);
 
-        btnPet.setOnAction(evento -> {
-            App.inserirCena(Pet.criarCena(nomeAtendente));
+        btnCadastro.setOnAction(evento -> {
+            App.inserirCena(Cadastro.criarCena(nomeAtendente));
         });
 
-        btnCliente.setOnAction(evento -> {
-            App.inserirCena(Cliente.criarCena(nomeAtendente));
-        });
-
+    
          btnDeslogar.setOnAction(evento -> {
             App.inserirCena(Login.criarCena());
         });
