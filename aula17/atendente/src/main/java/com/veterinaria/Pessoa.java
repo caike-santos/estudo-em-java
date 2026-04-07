@@ -54,14 +54,17 @@ public abstract class Pessoa {
         return telefone;
     }
 
-    public  void exibeDados(){
-        System.out.println("-------------------------------");
-        System.out.println("Dados da pessoa:");
-        System.out.println("Nome: " + getNome());
-        System.out.println("Idade: " + getIdade());
-        System.out.println("cpf: " + getCpf());
-        this.endereço.exibeEndereço();
-        this.telefone.exibeTelefone();
-        System.out.println("Email: " + getEmail());
+    public String exibeCpf(){
+        return getCpf().substring(0, 3) + "." + getCpf().substring(3 , 6)+ "." + getCpf().substring(6, 9) + "-" + getCpf().substring(9);
+    }
+
+    public String exibeDados(){
+        return "\nDados da pessoa:" +
+        "\nNome: " + getNome() +
+        "\nIdade: " + getIdade() +
+        "\ncpf: " + exibeCpf() +
+        this.endereço.exibeEndereço() +
+        this.telefone.exibeTelefone() +
+        "\nEmail: " + getEmail() + "\n";
     }
 }

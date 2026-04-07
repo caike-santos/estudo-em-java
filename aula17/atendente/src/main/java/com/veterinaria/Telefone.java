@@ -22,8 +22,12 @@ public class Telefone {
         return numero;
     }
 
-    public void exibeTelefone(){
-        System.out.println("Telefone: (" + getDdd() + ") " + getNumero());
+    public String exibeNumero(){
+        return getNumero().substring(0, 5) + "-" + getNumero().substring(5);
+    }
+
+    public String exibeTelefone(){
+        return "Telefone: (" + getDdd() + ") " + exibeNumero();
     }
     
 }

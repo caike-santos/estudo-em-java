@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -60,12 +61,29 @@ public class CadastroCliente {
         Label lblIdade = new Label("Idade:");
         txtIdade = new TextField();
         txtIdade.setMaxWidth(150);
+        txtIdade.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+
+        if (!valorNovo.matches("\\d*")) {
+            txtIdade.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
         //HBox linhaIdade = new HBox(10);
         //linhaIdade.getChildren().addAll(lblIdade, txtIdade);
 
         Label lblCpf = new Label("Cpf:");
         txtCpf = new TextField();
         txtCpf.setMaxWidth(150);
+        
+        txtCpf.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+
+        if (valorNovo.length() > 11) {
+            txtCpf.setText(valorAntigo);
+        }   
+    
+        if (!valorNovo.matches("\\d*")) {
+            txtCpf.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
         //HBox linhaCpf = new HBox(10);
         //linhaCpf.getChildren().addAll(lblCpf, txtCpf);
 
@@ -78,10 +96,29 @@ public class CadastroCliente {
         Label lblDdd = new Label("Ddd:");
         txtDdd = new TextField();
         txtDdd.setMaxWidth(150);
+        txtDdd.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+        
+            if (valorNovo.length() > 2) {
+            txtDdd.setText(valorAntigo);
+        }   
+
+        if (!valorNovo.matches("\\d*")) {
+            txtDdd.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
 
         Label lblTelefone = new Label("Telefone:");
         txtTelefone = new TextField();
         txtTelefone.setMaxWidth(150);
+        txtTelefone.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+            if (valorNovo.length() > 9) {
+            txtTelefone.setText(valorAntigo);
+        }   
+
+        if (!valorNovo.matches("\\d*")) {
+            txtTelefone.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
         //HBox linhaTelefone = new HBox(10);
         //linhaTelefone.getChildren().addAll(lblTelefone, txtTelefone);
 
@@ -134,12 +171,28 @@ public class CadastroCliente {
         Label lblNumero = new Label("Numero:");
         txtNumero = new TextField();
         txtNumero.setMaxWidth(150);
+        txtNumero.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+
+        if (!valorNovo.matches("\\d*")) {
+            txtNumero.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
         //HBox linhaNumero = new HBox(10);
         //linhaNumero.getChildren().addAll(lblNumero, txtNumero);
 
         Label lblCep = new Label("Cep:");
         txtCep = new TextField();
         txtCep.setMaxWidth(150);
+        txtCep.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+
+        if (valorNovo.length() > 8) {
+            txtCep.setText(valorAntigo);
+        }   
+
+        if (!valorNovo.matches("\\d*")) {
+            txtCep.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
         //HBox linhaCep = new HBox(10);
         //linhaCep.getChildren().addAll(lblCep, txtCep);
 
@@ -237,4 +290,42 @@ public class CadastroCliente {
     public static TextField getTxtTelefone() {
         return txtTelefone;
     }
+    public static TextField getTxtDdd() {
+        return txtDdd;
+    }
+
+    public static void mostarNaTela(String header, String texto){
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Erro");
+        alerta.setHeaderText(header);
+        alerta.setContentText(texto);
+        alerta.showAndWait();
+    }
+
+    public static boolean temCampoVazioEndereco(){
+        if(txtBairro.getText().trim().isEmpty() || txtCep.getText().trim().isEmpty() || txtNumero.getText().trim().isEmpty() || txtRua.getText().trim().isEmpty()){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean temCampoVazioDados(){
+        if(txtCpf.getText().trim().isEmpty() || txtDdd.getText().trim().isEmpty() || txtEmail.getText().trim().isEmpty() || txtIdade.getText().trim().isEmpty() || txtNome.getText().trim().isEmpty() || txtTelefone.getText().trim().isEmpty()){
+            return true;
+        }
+        return false;
+    }
+
+
+    public static boolean emailInvalido(){
+        String emailDigitado = txtEmail.getText().trim();
+        String regraEmail = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    
+    if (!emailDigitado.matches(regraEmail)) {
+        return true;
+    }
+    return false;
+    }
+
+    
 }

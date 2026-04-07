@@ -64,24 +64,49 @@ public class Cadastro {
         rodape.getChildren().addAll(btnSalvarTudo, btnCancelar);
 
         btnSalvarTudo.setOnAction(evento -> {
-             String cadastroAtual = CadastroPet.getCadastro().getText();
-            if(cadastroAtual.isEmpty()){
-                Alert aviso = new Alert(Alert.AlertType.WARNING);
-                aviso.setTitle("Erro");
-                aviso.setHeaderText("Nenhum cadastro realizado");
-                aviso.setContentText("Faça pelo menos um cadastro para poder finalizado");
-                aviso.showAndWait();
+             String cadastroAtual = CadastroPet.getCadastro().getText().trim();
+            
+             
+            if(CadastroCliente.temCampoVazioEndereco()){
+                CadastroCliente.mostarNaTela("Faltam dados do endereço do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
+                return;
+            }else if(CadastroCliente.temCampoVazioDados()){
+                CadastroCliente.mostarNaTela("Faltam dados pessoais do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
+                return;
+            }else if(cadastroAtual.isEmpty() ){
+                CadastroCliente.mostarNaTela("Nenhum cadastro realizado", "Faça pelo menos um cadastro para poder finalizado");
+                return;
+            }
+            
+             int idadeNum = Integer.parseInt(CadastroCliente.getTxtIdade().getText());
+            
+            if(CadastroCliente.getTxtTelefone().getLength() < 9 || CadastroCliente.getTxtDdd().getLength() < 2){
+                CadastroCliente.mostarNaTela("Quantidade de caracteres do ddd e telefone invalido", "Por favor, preencha o campo ddd e telefone corretamente");
+            }else if(idadeNum < 18 || idadeNum > 120){
+                CadastroCliente.mostarNaTela("Idade do cliente invalida", "Por favor, preencha o campo idade corretamente(Apenas maiores de idade podem ter cadastro)");
+            }else if(CadastroCliente.getTxtCpf().getLength() < 11){
+                CadastroCliente.mostarNaTela("Quantidade de caracteres do cpf invalido", "Por favor, preencha o campo cpf corretamente");
+            }else if(CadastroCliente.getTxtCep().getLength() < 8){
+                CadastroCliente.mostarNaTela("Quantidade de caracteres do cep invalido", "Por favor, preencha o campo cep corretamente");
+            }else if(CadastroCliente.emailInvalido()){
+                 CadastroCliente.mostarNaTela("E-mail Inválido", "Por favor, digite um e-mail no formato correto (exemplo@dominio.com).");
             }else{
                 Cliente c = CadastroCliente.pegarDados(CadastroPet.getListaPet());
 
                 Alert concluido = new Alert(Alert.AlertType.INFORMATION);
                 concluido.setTitle("Cadastro Finalizado");
                 concluido.setHeaderText("Imprimindo Cadastro");
-                String nomes = ""; 
-                for(Pet pet : CadastroPet.getListaPet()){
+                //String nomes = ""; 
+                /*for(Pet pet : CadastroPet.getListaPet()){
                    nomes += pet.getNome() + ", ";
+                }*/
+                //concluido.setContentText(c.getNome() + " seus(s) pet(s) " + nomes + "foi cadastrado com Sucesso");
+                String exibirDados = "";
+                exibirDados = c.exibeDados();
+                for(Pet pet : CadastroPet.getListaPet()){
+                  exibirDados += "\nPet "+ (c.getPet().indexOf(pet) + 1) + pet.exibePet();
                 }
-                concluido.setContentText(c.getNome() + " seus(s) pet(s) " + nomes + "foi cadastrado com Sucesso");
+                concluido.setContentText(exibirDados);
                 concluido.showAndWait();
                 CadastroPet.getCadastro().clear();
                 App.inserirCena(Home.criarCena(atendente));

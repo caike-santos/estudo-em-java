@@ -46,14 +46,16 @@ public class Endereço {
     public void setRua(String rua) {
         this.rua = rua;
     }
-
-    public void exibeEndereço(){
-        System.out.println("Rua: " + getRua());
-        System.out.println("Bairro: " + getBairro());
-        System.out.println("Numero: " + getNumero());
-        System.out.println("Cep: " + getCep());
-        System.out.println("Complemento: " + getComplemento());
+    public String exibeCep(){
+        return getCep().substring(0, 5) + "-" + getCep().substring(5);
     }
 
+    public String exibeEndereço(){
+        return "\nRua: " + getRua() +
+        "\nBairro: " + getBairro() +
+        "\nNumero: " + getNumero() +
+        "\nCep: " + exibeCep() +
+        "\nComplemento: " + getComplemento() + "\n";
+    }
     
 }

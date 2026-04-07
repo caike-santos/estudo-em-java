@@ -86,14 +86,14 @@ public class Pet{
         System.out.println("Cirurgia bem sucedida");
     }
 
-    public void exibePet(){
-        System.out.println("Nome: " + getNome());
+    public String exibePet(){
+        return "\nNome: " + getNome() +
         //System.out.printf("Peso: %.2f\n", getPeso());
-        System.out.println("Idade: " + getIdade());
+        "\nIdade: " + getIdade() +
         //System.out.printf("Altura: %.2f\n", getAltura());
-        System.out.println("Sexo: " + getSexo());
+        "\nSexo: " + getSexo() +
         //System.out.println("Especie: " + getEspecie());
-        System.out.println("Raça: "+ getRaca());
+        "\nRaça: "+ getRaca() + "\n";
     }
 
 }
