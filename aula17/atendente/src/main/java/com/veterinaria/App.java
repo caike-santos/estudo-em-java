@@ -15,7 +15,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        
+        BancoDeDados.carregarDadosDeTeste();
         palcoPrincipal = stage;
         palcoPrincipal.setTitle("Pagina do Atendente");
         inserirCena(Login.criarCena());

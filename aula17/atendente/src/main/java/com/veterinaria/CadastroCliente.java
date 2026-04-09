@@ -6,7 +6,6 @@ import java.util.List;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -236,6 +235,8 @@ public class CadastroCliente {
         VBox vertical = new VBox(50);
         vertical.setAlignment(Pos.CENTER);
         vertical.getChildren().addAll(header, cadastro);
+
+        txtCpf.setText(Home.getTxtCpf().getText());
         
 
         return vertical;

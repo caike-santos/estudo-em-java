@@ -12,7 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class Cadastro {
+public class Cadastro{
     public static Parent criarCena(String atendente){
         TabPane painelDeAbas = new TabPane();
 
@@ -101,20 +101,16 @@ public class Cadastro {
                    nomes += pet.getNome() + ", ";
                 }*/
                 //concluido.setContentText(c.getNome() + " seus(s) pet(s) " + nomes + "foi cadastrado com Sucesso");
-                String exibirDados = "";
-                exibirDados = c.exibeDados();
-                for(Pet pet : CadastroPet.getListaPet()){
-                  exibirDados += "\nPet "+ (c.getPet().indexOf(pet) + 1) + pet.exibePet();
-                }
-                concluido.setContentText(exibirDados);
+                
+                concluido.setContentText(exibirDados(c));
                 concluido.showAndWait();
                 CadastroPet.getCadastro().clear();
+                BancoDeDados.adicionarCliente(c);
                 App.inserirCena(Home.criarCena(atendente));
             }
             
         });
             
-
         VBox telaPrincipal = new VBox();
         telaPrincipal.setAlignment(Pos.CENTER);
         VBox.setVgrow(painelDeAbas, Priority.ALWAYS);
@@ -123,5 +119,16 @@ public class Cadastro {
 
         return telaPrincipal;
     }
+
+
+    public static String exibirDados(Cliente c){
+        String exibirDados = "";
+                exibirDados = c.exibeDados();
+                for(Pet pet : c.getPet()){
+                  exibirDados += "\nPet "+ (c.getPet().indexOf(pet) + 1) + pet.exibePet();
+                }
+                return exibirDados;
+    }
 }
+
 

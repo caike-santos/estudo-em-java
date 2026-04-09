@@ -18,7 +18,7 @@ import javafx.scene.layout.VBox;
 
 public class Login{
     
-    
+    private static String atendente;
     public static Parent criarCena(){
         
         Image logo = new Image(Login.class.getResource("/imagens/pet.png").toExternalForm());
@@ -62,7 +62,7 @@ public class Login{
 
         btnLogar.setOnAction(evento -> {
         
-           String atendente = txtUsuario.getText();
+            atendente = txtUsuario.getText();
             if(txtUsuario.getText().equals("caike") && txtSenha.getText().equals("123")){
                 App.inserirCena(Home.criarCena(atendente));
             }else{
@@ -76,5 +76,8 @@ public class Login{
         });
 
         return vertical;
+    }
+    public static String getAtendente() {
+        return atendente;
     }
 }

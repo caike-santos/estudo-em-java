@@ -5,6 +5,7 @@ import java.util.List;
 
 public class BancoDeDados {
     private static List<Cliente> clientes = new ArrayList<>();
+   
     public static void adicionarCliente(Cliente c){
         clientes.add(c);
     }
@@ -25,6 +26,44 @@ public class BancoDeDados {
             mostrar += Cadastro.exibirDados(cliente);
         }
         return mostrar;
+    }
+
+    public static void carregarDadosDeTeste() {
+        
+        // --- CLIENTE 1: João da Silva (Com 1 Pet) ---
+        Endereço end1 = new Endereço("Centro", "Rua das Flores", 123, "12345678", "Casa");
+        Telefone tel1 = new Telefone("11", "987654321"); // Adapte se o seu construtor de Telefone for diferente
+        
+        List<Pet> petsJoao = new ArrayList<>();
+        petsJoao.add(new Pet("Rex", 3, "Macho", "Vira-lata"));
+        
+        Cliente cliente1 = new Cliente("João da Silva", 35, "11122233344", end1, tel1, "joao@email.com", petsJoao);
+        adicionarCliente(cliente1);
+
+
+        // --- CLIENTE 2: Maria Oliveira (Com 1 Pet) ---
+        Endereço end2 = new Endereço("Jardins", "Avenida Paulista", 1500, "01310100", "Apto 45");
+        Telefone tel2 = new Telefone("21", "999998888");
+        
+        List<Pet> petsMaria = new ArrayList<>();
+        petsMaria.add(new Pet("Luna", 2, "Fêmea", "Poodle"));
+        
+        Cliente cliente2 = new Cliente("Maria Oliveira", 28, "55566677788", end2, tel2, "maria@email.com", petsMaria);
+        adicionarCliente(cliente2);
+
+
+        // --- CLIENTE 3: Carlos Eduardo (Com 2 Pets!) ---
+        Endereço end3 = new Endereço("Copacabana", "Rua Barata Ribeiro", 789, "22040001", "Bloco B");
+        Telefone tel3 = new Telefone("31", "911223344");
+        
+        List<Pet> petsCarlos = new ArrayList<>();
+        petsCarlos.add(new Pet("Thor", 5, "Macho", "Bulldog"));
+        petsCarlos.add(new Pet("Mia", 1, "Fêmea", "Gato Persa")); // A lista aceita vários!
+        
+        Cliente cliente3 = new Cliente("Carlos Eduardo", 42, "99988877766", end3, tel3, "carlos@email.com", petsCarlos);
+        adicionarCliente(cliente3);
+
+        System.out.println("✅ 3 Clientes de teste carregados com sucesso no Banco de Dados!");
     }
 
 }
