@@ -24,9 +24,10 @@ public class ExibirClientes {
         btn.getChildren().add(voltar);
         btn.setAlignment(Pos.CENTER);
 
-        VBox coluna = new VBox();
+        VBox coluna = new VBox(25);
         coluna.getChildren().addAll(lista, voltar);
         coluna.setPadding(new Insets(30, 20, 20, 20));
+        coluna.setAlignment(Pos.CENTER);
         VBox.setVgrow(lista, Priority.ALWAYS);
 
         voltar.setOnAction(evento -> {
