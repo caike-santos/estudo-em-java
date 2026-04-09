@@ -9,6 +9,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -37,6 +39,25 @@ public class Home {
         linhaHeader.setPadding(new Insets(30, 40, 40, 40)); 
         linhaHeader.setAlignment(Pos.CENTER_LEFT);
         linhaHeader.getChildren().addAll(mostarLogo, lblTitulo, mola, btnDeslogar);
+
+        Image logo1 = new Image(Login.class.getResource("/imagens/pet.png").toExternalForm());
+        ImageView mostarLogo1 = new ImageView(logo1);
+        mostarLogo1.setFitHeight(60);
+        mostarLogo1.setPreserveRatio(true);
+
+        Label lblTitulo1 = new Label("Tela de cadastro");
+        lblTitulo1.getStyleClass().add("titulo");
+
+        Region mola1 = new Region();
+        HBox.setHgrow(mola1, Priority.ALWAYS);
+
+        Button btnDeslogar1 = new Button("Deslogar");
+        btnDeslogar1.getStyleClass().add("btnSecundario");
+
+        HBox linhaHeader1 = new HBox(20);
+        linhaHeader1.setPadding(new Insets(30, 40, 40, 40)); 
+        linhaHeader1.setAlignment(Pos.CENTER_LEFT);
+        linhaHeader1.getChildren().addAll(mostarLogo1, lblTitulo1, mola1, btnDeslogar1);
         
 
         Label lblSubTitulo = new Label("Bem-Vindo(a) " + nomeAtendente);
@@ -71,36 +92,31 @@ public class Home {
         btnBuscar.getStyleClass().add("btnSecundario");
 
         VBox colunaBuscar = new VBox(15);
-        colunaBuscar.getChildren().addAll(linhaBuscar, linhaCpf, linhaBtnBuscar);
-        
-
-
-        Label lblClientes = new Label("Exibir clientes cadastrados");
-        lblClientes.getStyleClass().add("subtitulo");
-        HBox linhaClientes = new HBox();
-        linhaClientes.getChildren().add(lblClientes);
-
-        Button btnClientes = new Button("Exibir clientes");
-
-        HBox linhaBtn = new HBox(10);
-        linhaBtn.getChildren().addAll(btnClientes);
+        colunaBuscar.getChildren().addAll(linhaHeader, linhaBuscar, linhaCpf, linhaBtnBuscar);
 
         VBox colunaCadastrar = new VBox(15);
-        colunaCadastrar.setAlignment(Pos.CENTER);
-        colunaCadastrar.getChildren().addAll(linhaClientes, linhaBtn);
+        colunaCadastrar.getChildren().addAll(linhaHeader1, ExibirClientes.criarCena());
+        
+         Arrays.asList(linhaSubTitulo, linhaBtnBuscar, linhaBuscar, linhaCpf).forEach(linha -> linha.setAlignment(Pos.CENTER));
 
+         TabPane painelDeAbas = new TabPane();
 
-        HBox linhaHome = new HBox(150);
-        linhaHome.getChildren().addAll(colunaBuscar, colunaCadastrar);
+        Tab abaBusca = new Tab("Busca de Cliente");
+        abaBusca.setClosable(false);
+        
+        abaBusca.setContent(colunaBuscar);
 
-         Arrays.asList(linhaSubTitulo, linhaBtn, linhaBtnBuscar, linhaBuscar, linhaClientes, linhaCpf, linhaHome).forEach(linha -> linha.setAlignment(Pos.CENTER));
+        Tab abaListaClientes = new Tab("Lista dos clientes");
+        abaListaClientes.setClosable(false);
+
+        abaListaClientes.setContent(colunaCadastrar);
+
+        painelDeAbas.getTabs().addAll(abaBusca, abaListaClientes);
 
         VBox verticalHome = new VBox(120);
-        verticalHome.getChildren().addAll(linhaHeader, linhaHome);
+        verticalHome.getChildren().addAll(painelDeAbas);
 
-        btnClientes.setOnAction(evento ->{
-            App.inserirCena(ExibirClientes.criarCena());
-        });
+        VBox.setVgrow(painelDeAbas, Priority.ALWAYS);
         
          btnDeslogar.setOnAction(evento -> {
             App.inserirCena(Login.criarCena());
