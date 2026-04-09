@@ -26,6 +26,11 @@
     -fx-text-fill: #333333;
     -fx-font-weight: bold;
 }
+.naoEditavel{
+    -fx-background-color: #e0e0e0; 
+    -fx-text-fill: #555555;
+    
+}
 
 /* Dá um estilo moderno às caixinhas de texto */
 .text-field, .combo-box {

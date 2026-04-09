@@ -91,8 +91,14 @@ public class Home {
         linhaBtnBuscar.getChildren().add(btnBuscar);
         btnBuscar.getStyleClass().add("btnSecundario");
 
-        VBox colunaBuscar = new VBox(15);
-        colunaBuscar.getChildren().addAll(linhaHeader, linhaBuscar, linhaCpf, linhaBtnBuscar);
+        VBox conteudoBuscar = new VBox(30);
+        conteudoBuscar.getChildren().addAll(linhaBuscar, linhaCpf, linhaBtnBuscar);
+        //conteudoBuscar.setPadding(new Insets(30, 20, 20, 20));
+        //VBox.setVgrow( conteudoBuscar, Priority.ALWAYS);
+
+        VBox colunaBuscar = new VBox(100);
+        colunaBuscar.getChildren().addAll(linhaHeader, conteudoBuscar);
+        
 
         VBox colunaCadastrar = new VBox(15);
         colunaCadastrar.getChildren().addAll(linhaHeader1, ExibirClientes.criarCena());
@@ -151,6 +157,26 @@ public class Home {
                 for(Cliente cliente : BancoDeDados.getClientes()){
                     if(cpf.equals(cliente.getCpf())){
                         CadastroCliente.mostarNaTela("Cliente encontrado", "Cliente " + cliente.getNome() + " está cadastrado");
+
+                        Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmar.setTitle("Atenção!!!");
+                        confirmar.setHeaderText("Cliente encontrado");
+                        confirmar.setContentText("Cliente " + cliente.getNome() + " está cadastrado");
+
+                        ButtonType btnSim = new ButtonType("Sim");
+                        ButtonType btnNao = new ButtonType("Não", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                        confirmar.getButtonTypes().setAll(btnSim, btnNao);
+    
+                        confirmar.showAndWait().ifPresent(resposta -> {
+                         if (resposta == btnSim){
+                    
+                            App.inserirCena(EditarCliente.criarCena(cliente));
+                         }else{
+                            
+                        }
+                    });
+                        
                         return;
                 }
             }

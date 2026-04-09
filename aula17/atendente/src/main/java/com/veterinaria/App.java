@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
+
 /**
  * JavaFX App
  */
@@ -33,7 +34,7 @@ public class App extends Application {
             
         } else {
             // Se for a primeira vez (Tela de Login)
-            Scene cenaInicial = new Scene(novoLayout, 1000, 600);
+            Scene cenaInicial = new Scene(novoLayout, 1200, 800);
             
             // Aplica o CSS global na nossa única cena do aplicativo
             String cssGlobal = App.class.getResource("/styles/style.css").toExternalForm();

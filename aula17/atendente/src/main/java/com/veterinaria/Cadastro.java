@@ -24,7 +24,7 @@ public class Cadastro{
         Tab abaPet = new Tab("Dados do Pet");
         abaPet.setClosable(false);
 
-        abaPet.setContent(CadastroPet.criarCena(atendente));
+        abaPet.setContent(CadastroPet.criarCena());
 
         painelDeAbas.getTabs().addAll(abaCliente, abaPet);
 

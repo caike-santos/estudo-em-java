@@ -87,7 +87,7 @@ public class Pet{
     }
 
     public String exibePet(){
-        return "\nNome: " + getNome() +
+        return "Nome: " + getNome() +
         //System.out.printf("Peso: %.2f\n", getPeso());
         "\nIdade: " + getIdade() +
         //System.out.printf("Altura: %.2f\n", getAltura());

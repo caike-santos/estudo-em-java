@@ -25,7 +25,8 @@ public class CadastroPet {
     private static  ComboBox<String> cbmSexo;
     private static List<Pet> listaPet = new ArrayList<>();
     private static TextArea cadastro;
-    public static Parent criarCena(String atendente){
+    private static VBox layout;
+    public static Parent criarCena(){
         //header
         
 
@@ -140,8 +141,8 @@ public class CadastroPet {
         //HBox linhaIdade = new HBox(10);
         //HBox linhaRaca = new HBox(10);
         //HBox linhaSexo = new HBox(10); 
-        HBox linhaBtn = new HBox(10);
-        HBox linhaCadastro = new HBox(10);
+        HBox linhaBtn = new HBox();
+        HBox linhaCadastro = new HBox();
 
         //linhaNome.getChildren().addAll(lblNome, txtNome);
         //linhaIdade.getChildren().addAll(lblIdade, txtIdade);
@@ -151,21 +152,21 @@ public class CadastroPet {
         linhaCadastro.getChildren().add(cadastro);
        
 
-        VBox vertical = new VBox(20);
+        layout = new VBox(20);
 
         Arrays.asList(header, linhaBtn, linhaCadastro)
       .forEach(linha -> linha.setAlignment(Pos.CENTER));
         
-        vertical.setAlignment(Pos.CENTER); 
+        layout.setAlignment(Pos.CENTER); 
 
-        vertical.getChildren().addAll(header, gridPet, linhaBtn, linhaCadastro);
+        layout.getChildren().addAll(header, gridPet, linhaBtn, linhaCadastro);
         
 
         //VBox.setVgrow(linhaCadastro, Priority.ALWAYS);
         //HBox.setHgrow(linhaNome, Priority.ALWAYS);
 
         //vertical.setMaxWidth(2000);
-         return vertical;
+         return layout;
          
         //fimMontandoCena
         //fimCadastro
@@ -198,5 +199,8 @@ public class CadastroPet {
     }
     public static List<Pet> getListaPet() {
         return listaPet;
+    }
+    public static VBox getLayout() {
+        return layout;
     }
 }
