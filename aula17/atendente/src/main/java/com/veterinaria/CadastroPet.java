@@ -59,6 +59,12 @@ public class CadastroPet {
         Label lblIdade = new Label("Idade do pet:");
         txtIdade = new TextField();
         txtIdade.setMaxWidth(250);
+        txtIdade.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+
+        if (!valorNovo.matches("\\d*")) {
+            txtIdade.setText(valorNovo.replaceAll("[^\\d]", ""));
+        }
+         });
 
         Label lblRaca = new Label("Raça do pet:");
         txtRaca = new TextField();

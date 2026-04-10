@@ -251,6 +251,9 @@ public class EditarCliente {
 
         gridPets.add(btnCadastrar, 0, gridPets.getRowCount());
         GridPane.setHalignment(btnCadastrar, javafx.geometry.HPos.CENTER);
+
+        Button btnRemover = new Button("Remover Pet");
+        gridPets.add(btnRemover, 1, gridPets.getRowCount() - 1);
         
         HBox cadastro = new HBox(100);
         cadastro.getChildren().addAll(gridDados, gridEndereco, gridPets);
@@ -258,7 +261,7 @@ public class EditarCliente {
 
         Arrays.asList(header, cadastro).forEach(linha -> linha.setAlignment(Pos.CENTER));
 
-         Button btnSalvarTudo = new Button("Salvar Cliente e Pet");
+         Button btnSalvarTudo = new Button("Salvar dados do cliente");
         btnSalvarTudo.getStyleClass().add("btn_salvar");
 
         Button btnCancelar = new Button("Cancelar");
@@ -289,6 +292,10 @@ public class EditarCliente {
             AddPet.abrirJanela();
          });
 
+            btnRemover.setOnAction(e -> {
+                RemoverPet.abrirJanela();
+            });
+
         HBox rodape = new HBox(50);
         rodape.setAlignment(Pos.CENTER);
         
@@ -299,34 +306,42 @@ public class EditarCliente {
         rodape.getChildren().addAll(btnSalvarTudo, btnCancelar);
 
         btnSalvarTudo.setOnAction(evento -> {
-             String cadastroAtual = CadastroPet.getCadastro().getText().trim();
             
              
-            if(CadastroCliente.temCampoVazioEndereco()){
-                CadastroCliente.mostarNaTela("Faltam dados do endereço do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
+            if(EditarCliente.temCampoVazioEndereco()){
+                EditarCliente.mostarNaTela("Faltam dados do endereço do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
                 return;
-            }else if(CadastroCliente.temCampoVazioDados()){
-                CadastroCliente.mostarNaTela("Faltam dados pessoais do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
-                return;
-            }else if(cadastroAtual.isEmpty() ){
-                CadastroCliente.mostarNaTela("Nenhum cadastro realizado", "Faça pelo menos um cadastro para poder finalizado");
+            }else if(EditarCliente.temCampoVazioDados()){
+                EditarCliente.mostarNaTela("Faltam dados pessoais do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
                 return;
             }
             
-             int idadeNum = Integer.parseInt(CadastroCliente.getTxtIdade().getText());
+             int idadeNum = Integer.parseInt(EditarCliente.getTxtIdade().getText());
             
-            if(CadastroCliente.getTxtTelefone().getLength() < 9 || CadastroCliente.getTxtDdd().getLength() < 2){
-                CadastroCliente.mostarNaTela("Quantidade de caracteres do ddd e telefone invalido", "Por favor, preencha o campo ddd e telefone corretamente");
+            if(EditarCliente.getTxtTelefone().getLength() < 9 || EditarCliente.getTxtDdd().getLength() < 2){
+                EditarCliente.mostarNaTela("Quantidade de caracteres do ddd e telefone invalido", "Por favor, preencha o campo ddd e telefone corretamente");
             }else if(idadeNum < 18 || idadeNum > 120){
-                CadastroCliente.mostarNaTela("Idade do cliente invalida", "Por favor, preencha o campo idade corretamente(Apenas maiores de idade podem ter cadastro)");
-            }else if(CadastroCliente.getTxtCpf().getLength() < 11){
-                CadastroCliente.mostarNaTela("Quantidade de caracteres do cpf invalido", "Por favor, preencha o campo cpf corretamente");
-            }else if(CadastroCliente.getTxtCep().getLength() < 8){
-                CadastroCliente.mostarNaTela("Quantidade de caracteres do cep invalido", "Por favor, preencha o campo cep corretamente");
-            }else if(CadastroCliente.emailInvalido()){
-                 CadastroCliente.mostarNaTela("E-mail Inválido", "Por favor, digite um e-mail no formato correto (exemplo@dominio.com).");
+                EditarCliente.mostarNaTela("Idade do cliente invalida", "Por favor, preencha o campo idade corretamente(Apenas maiores de idade podem ter cadastro)");
+            }else if(EditarCliente.getTxtCpf().getLength() < 11){
+                EditarCliente.mostarNaTela("Quantidade de caracteres do cpf invalido", "Por favor, preencha o campo cpf corretamente");
+            }else if(EditarCliente.getTxtCep().getLength() < 8){
+                EditarCliente.mostarNaTela("Quantidade de caracteres do cep invalido", "Por favor, preencha o campo cep corretamente");
+            }else if(EditarCliente.emailInvalido()){
+                 EditarCliente.mostarNaTela("E-mail Inválido", "Por favor, digite um e-mail no formato correto (exemplo@dominio.com).");
             }else{
-                Cliente c = CadastroCliente.pegarDados(CadastroPet.getListaPet());
+                c1.setCpf(txtCpf.getText());
+                c1.getEndereço().setBairro(txtBairro.getText());
+                c1.getEndereço().setCep(txtCep.getText());
+                c1.getTelefone().setDdd(txtDdd.getText());
+                c1.setEmail(txtEmail.getText());
+                c1.setIdade(Integer.parseInt(txtIdade.getText()));
+                c1.setNome(txtNome.getText());
+                c1.getEndereço().setNumero(Integer.parseInt(txtNumero.getText()));
+                c1.getEndereço().setRua(txtRua.getText());
+                c1.getTelefone().setNumero(txtTelefone.getText());
+                c1.getEndereço().setComplemento(areaComplemento.getText());
+               
+
 
                 Alert concluido = new Alert(Alert.AlertType.INFORMATION);
                 concluido.setTitle("Cadastro Finalizado");
@@ -337,11 +352,10 @@ public class EditarCliente {
                 }*/
                 //concluido.setContentText(c.getNome() + " seus(s) pet(s) " + nomes + "foi cadastrado com Sucesso");
                 
-                concluido.setContentText(exibirDados(c));
+                concluido.setContentText(exibirDados(c1));
                 concluido.showAndWait();
-                CadastroPet.getCadastro().clear();
-                BancoDeDados.adicionarCliente(c);
                 App.inserirCena(Home.criarCena(Login.getAtendente()));
+
             }
             
         });

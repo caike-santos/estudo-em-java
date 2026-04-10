@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -45,7 +46,6 @@ public class ExibirClientes {
         TitledPane painelCliente = new TitledPane(cliente.getNome(), detalhes);
         painelCliente.setMaxHeight(25);
 
-        
         // 5. Adiciona essa barra na sanfona principal
         sanfonaClientes.getPanes().add(painelCliente);
 
@@ -56,6 +56,21 @@ public class ExibirClientes {
     ScrollPane rolagem = new ScrollPane();
         rolagem.setContent(sanfonaClientes);
         rolagem.setFitToWidth(true);
+        rolagem.addEventFilter(ScrollEvent.SCROLL, evento -> {
+    
+    // 1. Defina a sua velocidade aqui (Quanto maior, mais rápido). 
+    // O valor 0.003 costuma ser excelente, mas você pode testar 0.005, 0.01, etc.
+    double velocidade = 0.005; 
+    
+    // 2. Pega a força que o usuário girou a rodinha e multiplica pela sua velocidade
+    double movimento = evento.getDeltaY() * velocidade;
+    
+    // 3. Pega a posição atual da barra de rolagem (Vvalue) e subtrai o movimento
+    rolagem.setVvalue(rolagem.getVvalue() - movimento);
+    
+    // 4. A mágica: "Mata" o evento padrão do JavaFX para impedir que ele role super devagar junto com o nosso
+    evento.consume(); 
+});
          rolagem.setMaxWidth(500);
     VBox coluna = new VBox(25);
         coluna.getChildren().addAll(rolagem);

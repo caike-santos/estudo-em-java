@@ -52,3 +52,7 @@
 .btn_salvar{
     -fx-padding-bottom: 20px;
 }
+.naoEditavel{
+    -fx-background-color: #e0e0e0;
+     -fx-text-fill: #555555;
+}

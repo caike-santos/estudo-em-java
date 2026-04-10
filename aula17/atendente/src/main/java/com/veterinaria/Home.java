@@ -128,6 +128,10 @@ public class Home {
             App.inserirCena(Login.criarCena());
         });
 
+         btnDeslogar1.setOnAction(evento -> {
+            App.inserirCena(Login.criarCena());
+        });
+
         btnBuscar.setOnAction(evento -> {
             if(txtCpf.getText().isEmpty()){
                 CadastroCliente.mostarNaTela("Campo Vazio", nomeAtendente + ", preencha o campo corretamente");
@@ -156,8 +160,6 @@ public class Home {
             }else{
                 for(Cliente cliente : BancoDeDados.getClientes()){
                     if(cpf.equals(cliente.getCpf())){
-                        CadastroCliente.mostarNaTela("Cliente encontrado", "Cliente " + cliente.getNome() + " está cadastrado");
-
                         Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION);
                         confirmar.setTitle("Atenção!!!");
                         confirmar.setHeaderText("Cliente encontrado");
@@ -172,9 +174,7 @@ public class Home {
                          if (resposta == btnSim){
                     
                             App.inserirCena(EditarCliente.criarCena(cliente));
-                         }else{
-                            
-                        }
+                         }
                     });
                         
                         return;
