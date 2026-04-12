@@ -1,5 +1,6 @@
 package com.veterinaria;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,9 @@ public class BancoDeDados {
         Telefone tel1 = new Telefone("11", "987654321"); // Adapte se o seu construtor de Telefone for diferente
         
         List<Pet> petsJoao = new ArrayList<>();
-        petsJoao.add(new Pet("Rex", 3, "Macho", "Vira-lata"));
+        petsJoao.add(new Pet("Rex", LocalDate.of(2020, 5, 15), "Macho", "Vira-lata"));
         
-        Cliente cliente1 = new Cliente("João da Silva", 35, "11122233344", end1, tel1, "joao@email.com", petsJoao);
+        Cliente cliente1 = new Cliente("João da Silva", LocalDate.of(1985, 5, 15), "11122233344", end1, tel1, "joao@email.com", petsJoao);
         adicionarCliente(cliente1);
 
 
@@ -46,9 +47,9 @@ public class BancoDeDados {
         Telefone tel2 = new Telefone("21", "999998888");
         
         List<Pet> petsMaria = new ArrayList<>();
-        petsMaria.add(new Pet("Luna", 2, "Fêmea", "Poodle"));
+        petsMaria.add(new Pet("Luna", LocalDate.of(2020, 5, 15), "Fêmea", "Poodle"));
         
-        Cliente cliente2 = new Cliente("Maria Oliveira", 28, "55566677788", end2, tel2, "maria@email.com", petsMaria);
+        Cliente cliente2 = new Cliente("Maria Oliveira", LocalDate.of(1995, 5, 15), "55566677788", end2, tel2, "maria@email.com", petsMaria);
         adicionarCliente(cliente2);
 
 
@@ -57,10 +58,10 @@ public class BancoDeDados {
         Telefone tel3 = new Telefone("31", "911223344");
         
         List<Pet> petsCarlos = new ArrayList<>();
-        petsCarlos.add(new Pet("Thor", 5, "Macho", "Bulldog"));
-        petsCarlos.add(new Pet("Mia", 1, "Fêmea", "Gato Persa")); // A lista aceita vários!
+        petsCarlos.add(new Pet("Thor", LocalDate.of(2018, 3, 10), "Macho", "Bulldog"));
+        petsCarlos.add(new Pet("Mia", LocalDate.of(2022, 8, 20), "Fêmea", "Gato Persa")); // A lista aceita vários!
         
-        Cliente cliente3 = new Cliente("Carlos Eduardo", 42, "99988877766", end3, tel3, "carlos@email.com", petsCarlos);
+        Cliente cliente3 = new Cliente("Carlos Eduardo", LocalDate.of(1980, 3, 10), "99988877766", end3, tel3, "carlos@email.com", petsCarlos);
         adicionarCliente(cliente3);
 
         System.out.println("✅ 3 Clientes de teste carregados com sucesso no Banco de Dados!");

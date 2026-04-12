@@ -1,22 +1,32 @@
 package com.veterinaria;
-
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.Period;
 public class Pet{
     private String nome;
     //private float peso;
     private int idade;
+    private LocalDate dataNascimento;
     //private float altura;
     private String sexo;
     //private String especie;
     private String raca;
 
-    public Pet(String nome, int idade,  String sexo, String raca){
+    public Pet(String nome, LocalDate dataNascimento, String sexo, String raca){
         //this.altura = altura;
-        this.idade = idade;
+        this.dataNascimento = dataNascimento;
         this.nome = nome;
         //this.peso = peso;
         this.sexo = sexo;
         //this.especie = especie;
         this.raca = raca;
+    }
+
+    public int getIdade(){
+        LocalDate dataAtual = LocalDate.now();
+        Period periodo = Period.between(this.dataNascimento, dataAtual);
+        setIdade(periodo.getYears());
+        return periodo.getYears();
     }
 
     /*public void setAltura(float altura) {
@@ -27,9 +37,6 @@ public class Pet{
     }*/
     public void setIdade(int idade) {
         this.idade = idade;
-    }
-    public int getIdade() {
-        return idade;
     }
     public void setNome(String nome) {
         this.nome = nome;

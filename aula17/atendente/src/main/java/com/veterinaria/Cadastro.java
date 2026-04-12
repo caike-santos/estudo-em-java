@@ -1,5 +1,7 @@
 package com.veterinaria;
 
+import java.time.LocalDate;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -64,6 +66,11 @@ public class Cadastro{
         rodape.getChildren().addAll(btnSalvarTudo, btnCancelar);
 
         btnSalvarTudo.setOnAction(evento -> {
+             try {
+                    CadastroCliente.setDpIdade(CadastroCliente.getDpIdade().getConverter().fromString(CadastroCliente.getDpIdade().getEditor().getText()));
+                } catch (Exception ex) {
+                    CadastroCliente.setDpIdade(null); // Se deu erro na conversão, vira nulo para ser barrado no if
+                }
              String cadastroAtual = CadastroPet.getCadastro().getText().trim();
             
              
@@ -78,12 +85,13 @@ public class Cadastro{
                 return;
             }
             
-             int idadeNum = Integer.parseInt(CadastroCliente.getTxtIdade().getText());
+            int idadeNum = LocalDate.now().getYear() - CadastroCliente.getDpIdade().getValue().getYear();
             
+
             if(CadastroCliente.getTxtTelefone().getLength() < 9 || CadastroCliente.getTxtDdd().getLength() < 2){
                 CadastroCliente.mostarNaTela("Quantidade de caracteres do ddd e telefone invalido", "Por favor, preencha o campo ddd e telefone corretamente");
             }else if(idadeNum < 18 || idadeNum > 120){
-                CadastroCliente.mostarNaTela("Idade do cliente invalida", "Por favor, preencha o campo idade corretamente(Apenas maiores de idade podem ter cadastro)");
+                CadastroCliente.mostarNaTela("Idade inválida", "Por favor, preencha o campo idade com uma data de nascimento válida. O cliente deve ter entre 18 e 120 anos.");
             }else if(CadastroCliente.getTxtCpf().getLength() < 11){
                 CadastroCliente.mostarNaTela("Quantidade de caracteres do cpf invalido", "Por favor, preencha o campo cpf corretamente");
             }else if(CadastroCliente.getTxtCep().getLength() < 8){
@@ -125,7 +133,7 @@ public class Cadastro{
         String exibirDados = "";
                 exibirDados = c.exibeDados();
                 for(Pet pet : c.getPet()){
-                  exibirDados += "\nPet "+ (c.getPet().indexOf(pet) + 1) + pet.exibePet();
+                  exibirDados += "\nPet "+ (c.getPet().indexOf(pet) + 1) + "\n" + pet.exibePet();
                 }
                 return exibirDados;
     }

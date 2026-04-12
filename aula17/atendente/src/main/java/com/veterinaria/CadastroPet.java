@@ -1,14 +1,17 @@
 package com.veterinaria;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.util.StringConverter;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -20,7 +23,7 @@ import javafx.scene.layout.VBox;
 
 public class CadastroPet {
     private static TextField txtNome;
-    private static TextField txtIdade;
+    private static DatePicker dpIdade;
     private static TextField txtRaca;
     private static  ComboBox<String> cbmSexo;
     private static List<Pet> listaPet = new ArrayList<>();
@@ -56,15 +59,84 @@ public class CadastroPet {
         txtNome = new TextField();
         txtNome.setMaxWidth(250);
         
-        Label lblIdade = new Label("Idade do pet:");
-        txtIdade = new TextField();
-        txtIdade.setMaxWidth(250);
-        txtIdade.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+        Label lblIdade = new Label("Data de Nascimento:");
+        dpIdade = new DatePicker();
+        dpIdade.setMaxWidth(150);
+        dpIdade.setPromptText("dd/mm/aaaa");
+        // 1. Pega a "caixinha de texto" que fica dentro do DatePicker
+        TextField editorData = dpIdade.getEditor();
 
-        if (!valorNovo.matches("\\d*")) {
-            txtIdade.setText(valorNovo.replaceAll("[^\\d]", ""));
+        // 2. Cria o "Ouvinte" que espia tudo o que é digitado em tempo real
+        editorData.textProperty().addListener((observavel, valorAntigo, valorNovo) -> {
+            
+            if (valorNovo == null) return;
+
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 8 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 8) {
+                apenasNumeros = apenasNumeros.substring(0, 8);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 2 || i == 4) {
+                    formatado.append("/");
+                }
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    editorData.setText(formatado.toString());
+                    editorData.positionCaret(formatado.length()); 
+                });
+            }
+});
+       DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+// 2. Coloca o tradutor no DatePicker
+        dpIdade.setConverter(new StringConverter<LocalDate>() {
+    
+    // Transforma a Data (Objeto) em Texto para mostrar na tela
+    @Override
+    public String toString(LocalDate data) {
+        if (data != null) {
+            return formatoBR.format(data);
         }
-         });
+        return "";
+    }
+
+    // Transforma o Texto digitado no teclado em Data (Objeto)
+    @Override
+public LocalDate fromString(String texto) {
+    if (texto != null && !texto.trim().isEmpty()) {
+        try {
+            // 1. Primeiro tenta ler a data no formato BR
+            LocalDate dataDigitada = LocalDate.parse(texto, formatoBR);
+            
+            // 2. A MÁGICA: Verifica se a data exata cai no futuro
+            if (dataDigitada.isAfter(LocalDate.now())) {
+                return null; // A data é do futuro (idade negativa)! Devolve nulo para barrar.
+            }
+            
+            // 3. Se a data for válida e no passado/hoje, devolve ela pronta!
+            return dataDigitada;
+            
+        } catch (Exception e) {
+            // Cai aqui se digitar letras ou 32/15/2020
+            return null; 
+        }
+    }
+    return null;
+}
+
+});
 
         Label lblRaca = new Label("Raça do pet:");
         txtRaca = new TextField();
@@ -79,7 +151,7 @@ public class CadastroPet {
         gridPet.add(txtNome, 1, 0);
 
         gridPet.add(lblIdade, 0, 1);
-        gridPet.add(txtIdade, 1, 1);
+        gridPet.add(dpIdade, 1, 1);
 
         gridPet.add(lblRaca, 0, 2);
         gridPet.add(txtRaca, 1, 2);
@@ -96,27 +168,27 @@ public class CadastroPet {
 
         btnCadastrar.setOnAction(evento -> 
             {
-                String nome = txtNome.getText();
-                String idade = txtIdade.getText();
-                String raca = txtRaca.getText();
-                String sexo = cbmSexo.getValue();
+                try {
+                    dpIdade.setValue(dpIdade.getConverter().fromString(dpIdade.getEditor().getText()));
+                } catch (Exception ex) {
+                    dpIdade.setValue(null); // Se deu erro na conversão, vira nulo para ser barrado no if
+                }
+                
 
-                if(nome.isEmpty() || idade.isEmpty() || raca.isEmpty() || sexo.isEmpty()){
-                    Alert aviso = new Alert(Alert.AlertType.WARNING);
-                    aviso.setTitle("Erro");
-                    aviso.setHeaderText("Erro de Preenchimento");
-                    aviso.setContentText("Preencha todos os campos");
-                    aviso.showAndWait();
-                }else{
-                    if(!idade.matches("\\d*")){
+                if(txtNome.getText().trim().isEmpty() || txtRaca.getText().trim().isEmpty() || cbmSexo.getValue() == null){
+                    CadastroCliente.mostarNaTela("Faltam dados do Pet!", "Por favor, preencha todos os campos para cadastrar o pet.");
+                }else if(dpIdade.getValue() == null){
+                    CadastroCliente.mostarNaTela("Data de nascimento inválida!", "Por favor, preencha a data de nascimento com uma data válida.");
+                }/*else{
+                    if(!dataIdade.matches("\\d{2}-\\d{2}-\\d{4}")){
 
                         Alert avisonum = new Alert(Alert.AlertType.WARNING);
                         
                         avisonum.setTitle("Erro");
                         avisonum.setHeaderText("Erro de Preenchimento");
-                        avisonum.setContentText("Preencha o campo idade com numeros");
+                        avisonum.setContentText("Preencha o campo data de nascimento com uma data válida (formato: DD/MM/AAAA)");
                         avisonum.showAndWait();
-                    }else{
+                    }*/else{
 
                          Pet pet = CadastroPet.dadosPet();
                          listaPet.add(pet);
@@ -132,11 +204,11 @@ public class CadastroPet {
                         cadastro.appendText("raca: "+ pet.getRaca()+"\n");
                         cadastro.appendText("sexo: "+ pet.getSexo()+"\n");
 
-                        txtIdade.clear();
+                        dpIdade.setValue(null);
                         txtNome.clear();
                         txtRaca.clear();
                 }
-                }
+                
                 
         });
         //fimCadastro
@@ -180,11 +252,11 @@ public class CadastroPet {
 
     public static Pet dadosPet(){
         String nome = txtNome.getText();
-        int idade = Integer.parseInt(txtIdade.getText());
+        LocalDate dataIdade = dpIdade.getValue();
         String raca = txtRaca.getText();
         String sexo = cbmSexo.getValue();
 
-        return new Pet(nome, idade, sexo, raca);
+        return new Pet(nome, dataIdade, sexo, raca);
 
     }
 
@@ -194,8 +266,8 @@ public class CadastroPet {
     public static ComboBox<String> getCbmSexo() {
         return cbmSexo;
     }
-    public static TextField getTxtIdade() {
-        return txtIdade;
+    public static DatePicker getDpIdade() {
+        return dpIdade;
     }
     public static TextField getTxtNome() {
         return txtNome;

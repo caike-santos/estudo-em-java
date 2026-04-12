@@ -1,5 +1,8 @@
 package com.veterinaria;
 
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -16,12 +20,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class EditarCliente {
     private static TextField txtNome;
-    private static TextField txtIdade;
+    private static DatePicker dpIdade;
     private static TextField txtCpf;
     private static TextField txtEmail;
     private static TextField txtDdd;
@@ -64,15 +69,74 @@ public class EditarCliente {
         //HBox linhaNome = new HBox(10);
         //linhaNome.getChildren().addAll(lblNome, txtNome);
 
-        Label lblIdade = new Label("Idade:");
-        txtIdade = new TextField();
-        txtIdade.setMaxWidth(150);
-        txtIdade.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
+        Label lblIdade = new Label("Data de Nascimento:");
+        dpIdade = new DatePicker();
+        dpIdade.setMaxWidth(150);
+        TextField editorData = dpIdade.getEditor();
 
-        if (!valorNovo.matches("\\d*")) {
-            txtIdade.setText(valorNovo.replaceAll("[^\\d]", ""));
+        // 2. Cria o "Ouvinte" que espia tudo o que é digitado em tempo real
+        editorData.textProperty().addListener((observavel, valorAntigo, valorNovo) -> {
+            
+            if (valorNovo == null) return;
+
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 8 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 8) {
+                apenasNumeros = apenasNumeros.substring(0, 8);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 2 || i == 4) {
+                    formatado.append("/");
+                }
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    editorData.setText(formatado.toString());
+                    editorData.positionCaret(formatado.length()); 
+                });
+            }
+});
+        DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+// 2. Coloca o tradutor no DatePicker
+        dpIdade.setConverter(new StringConverter<LocalDate>() {
+    
+        // Transforma a Data (Objeto) em Texto para mostrar na tela
+        @Override
+        public String toString(LocalDate data) {
+            if (data != null) {
+                return formatoBR.format(data);
+            }
+            return "";
         }
-         });
+
+        // Transforma o Texto digitado no teclado em Data (Objeto)
+        @Override
+        public LocalDate fromString(String texto) {
+            if (texto != null && !texto.trim().isEmpty()) {
+                try {
+                    // Tenta ler no formato BR
+                    return LocalDate.parse(texto, formatoBR);
+                } catch (Exception e) {
+                    // Se o usuário digitar letras ou uma data impossível (32/15/2020), 
+                    // ele devolve nulo e o DatePicker apaga o erro sozinho!
+                    return null; 
+                }
+            }
+            return null;
+        }
+});
+
         //HBox linhaIdade = new HBox(10);
         //linhaIdade.getChildren().addAll(lblIdade, txtIdade);
 
@@ -138,7 +202,7 @@ public class EditarCliente {
         gridDados.add(txtNome, 1, 1);
 
         gridDados.add(lblIdade, 0, 2);
-        gridDados.add(txtIdade, 1, 2);
+        gridDados.add(dpIdade, 1, 2);
 
         gridDados.add(lblCpf, 0, 3);
         gridDados.add(txtCpf, 1, 3);
@@ -279,7 +343,6 @@ public class EditarCliente {
     
             confirmar.showAndWait().ifPresent(resposta -> {
                 if (resposta == btnSim){
-                    CadastroPet.getCadastro().clear();
                     App.inserirCena(Home.criarCena(Login.getAtendente()));
                 }
             });
@@ -306,7 +369,11 @@ public class EditarCliente {
         rodape.getChildren().addAll(btnSalvarTudo, btnCancelar);
 
         btnSalvarTudo.setOnAction(evento -> {
-            
+                try {
+                        dpIdade.setValue(dpIdade.getConverter().fromString(dpIdade.getEditor().getText()));
+                    } catch (Exception ex) {
+                        dpIdade.setValue(null); // Se deu erro na conversão, vira nulo para ser barrado no if
+                    }
              
             if(EditarCliente.temCampoVazioEndereco()){
                 EditarCliente.mostarNaTela("Faltam dados do endereço do Cliente!", "Por favor, volte na aba 'Dados do Cliente' e preencha todos os campos.");
@@ -316,7 +383,7 @@ public class EditarCliente {
                 return;
             }
             
-             int idadeNum = Integer.parseInt(EditarCliente.getTxtIdade().getText());
+             int idadeNum = LocalDate.now().getYear() - dpIdade.getValue().getYear();
             
             if(EditarCliente.getTxtTelefone().getLength() < 9 || EditarCliente.getTxtDdd().getLength() < 2){
                 EditarCliente.mostarNaTela("Quantidade de caracteres do ddd e telefone invalido", "Por favor, preencha o campo ddd e telefone corretamente");
@@ -329,13 +396,10 @@ public class EditarCliente {
             }else if(EditarCliente.emailInvalido()){
                  EditarCliente.mostarNaTela("E-mail Inválido", "Por favor, digite um e-mail no formato correto (exemplo@dominio.com).");
             }else{
-                c1.setCpf(txtCpf.getText());
                 c1.getEndereço().setBairro(txtBairro.getText());
                 c1.getEndereço().setCep(txtCep.getText());
                 c1.getTelefone().setDdd(txtDdd.getText());
                 c1.setEmail(txtEmail.getText());
-                c1.setIdade(Integer.parseInt(txtIdade.getText()));
-                c1.setNome(txtNome.getText());
                 c1.getEndereço().setNumero(Integer.parseInt(txtNumero.getText()));
                 c1.getEndereço().setRua(txtRua.getText());
                 c1.getTelefone().setNumero(txtTelefone.getText());
@@ -369,15 +433,14 @@ public class EditarCliente {
         vertical.setAlignment(Pos.CENTER);
         vertical.getChildren().addAll(header, cadastro, rodape);
 
-        String num1 = String.valueOf(c1.getIdade());
+        
         String num2 = String.valueOf(c1.getEndereço().getNumero());
         txtCpf.setText(Home.getTxtCpf().getText());
         txtBairro.setText(c1.getEndereço().getBairro());
         txtCep.setText(c1.getEndereço().getCep());
-        txtCpf.setText(c1.getCpf());
         txtDdd.setText(c1.getTelefone().getDdd());
         txtEmail.setText(c1.getEmail());
-        txtIdade.setText(num1);
+        dpIdade.setValue(c1.getDataNascimento());
         txtNome.setText(c1.getNome());
         txtNumero.setText(num2);
         txtRua.setText(c1.getEndereço().getRua());
@@ -385,8 +448,8 @@ public class EditarCliente {
         areaComplemento.setText(c1.getEndereço().getComplemento());
 
         //Arrays.asList(txtBairro, txtCep, txtDdd, txtEmail, txtNumero, txtTelefone).forEach(e -> e.);
-        Arrays.asList(txtCpf, txtIdade, txtNome).forEach(e -> e.setEditable(false));
-        Arrays.asList(txtCpf, txtIdade, txtNome).forEach(e -> e.getStyleClass().add("naoEditavel"));
+        Arrays.asList(txtCpf, dpIdade, txtNome).forEach(e -> e.setDisable(true));
+        Arrays.asList(txtCpf, dpIdade, txtNome).forEach(e -> e.getStyleClass().add("naoEditavel"));
         
 
         return vertical;
@@ -394,7 +457,7 @@ public class EditarCliente {
 
     public static Cliente pegarDados(List<Pet> p){
     String nome = txtNome.getText();
-    int idade = Integer.parseInt(txtIdade.getText());
+    
     String cpf = txtCpf.getText();
     String email = txtEmail.getText();
     String telefone = txtTelefone.getText();
@@ -408,7 +471,7 @@ public class EditarCliente {
     Telefone t = new Telefone(ddd, telefone);
     
     
-    return new Cliente(nome, idade, cpf, e, t, email, p);
+    return new Cliente(nome, dpIdade.getValue(), cpf, e, t, email, p);
     }
 
     public static TextArea getAreaComplemento() {
@@ -426,8 +489,8 @@ public class EditarCliente {
     public static TextField getTxtEmail() {
         return txtEmail;
     }
-    public static TextField getTxtIdade() {
-        return txtIdade;
+    public static DatePicker getDpIdade() {
+        return dpIdade;
     }
     public static TextField getTxtNome() {
         return txtNome;
@@ -461,7 +524,7 @@ public class EditarCliente {
     }
 
     public static boolean temCampoVazioDados(){
-        if(txtCpf.getText().trim().isEmpty() || txtDdd.getText().trim().isEmpty() || txtEmail.getText().trim().isEmpty() || txtIdade.getText().trim().isEmpty() || txtNome.getText().trim().isEmpty() || txtTelefone.getText().trim().isEmpty()){
+        if(txtCpf.getText().trim().isEmpty() || txtDdd.getText().trim().isEmpty() || txtEmail.getText().trim().isEmpty() || dpIdade.getValue() == null || txtNome.getText().trim().isEmpty() || txtTelefone.getText().trim().isEmpty()){
             return true;
         }
         return false;
