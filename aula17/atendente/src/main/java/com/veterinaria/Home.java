@@ -58,7 +58,8 @@ public class Home {
         linhaHeader1.setPadding(new Insets(30, 40, 40, 40)); 
         linhaHeader1.setAlignment(Pos.CENTER_LEFT);
         linhaHeader1.getChildren().addAll(mostarLogo1, lblTitulo1, mola1, btnDeslogar1);
-        
+
+    
 
         Label lblSubTitulo = new Label("Bem-Vindo(a) " + nomeAtendente);
         lblSubTitulo.getStyleClass().add("subtitulo");
@@ -75,16 +76,42 @@ public class Home {
         txtCpf.setMaxWidth(250);
         txtCpf.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
 
-        if (valorNovo.length() > 11) {
-            txtCpf.setText(valorAntigo);
-        }   
-    
-        if (!valorNovo.matches("\\d*")) {
-            txtCpf.setText(valorNovo.replaceAll("[^\\d]", ""));
-        }
+            if (valorNovo == null) return;
+
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 11 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 11) {
+                apenasNumeros = apenasNumeros.substring(0, 11);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 3 || i == 6){
+                    formatado.append(".");
+                }else if (i == 9){
+                    formatado.append("-");
+                }
+
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    txtCpf.setText(formatado.toString());
+                    txtCpf.positionCaret(formatado.length()); 
+                });
+            }
          });
         HBox linhaCpf = new HBox();
         linhaCpf.getChildren().add(txtCpf);
+
+        
 
         Button btnBuscar = new Button("Buscar");
         HBox linhaBtnBuscar = new HBox();
@@ -92,7 +119,7 @@ public class Home {
         btnBuscar.getStyleClass().add("btnSecundario");
 
         VBox conteudoBuscar = new VBox(30);
-        conteudoBuscar.getChildren().addAll(linhaBuscar, linhaCpf, linhaBtnBuscar);
+        conteudoBuscar.getChildren().addAll(linhaSubTitulo, linhaBuscar, linhaCpf, linhaBtnBuscar);
         //conteudoBuscar.setPadding(new Insets(30, 20, 20, 20));
         //VBox.setVgrow( conteudoBuscar, Priority.ALWAYS);
 
@@ -136,7 +163,7 @@ public class Home {
             if(txtCpf.getText().isEmpty()){
                 CadastroCliente.mostarNaTela("Campo Vazio", nomeAtendente + ", preencha o campo corretamente");
                 return;
-            }else if(txtCpf.getText().length() < 11 || txtCpf.getText().length() > 11){
+            }else if(txtCpf.getText().length() < 14 || txtCpf.getText().length() > 14){
                 CadastroCliente.mostarNaTela("Quantidade de caracteres invalidos", nomeAtendente + ", preencha o campo corretamente");
                 return;
             }
@@ -145,7 +172,7 @@ public class Home {
                 Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION);
             confirmar.setTitle("Atenção!!!");
             confirmar.setHeaderText("Cliente não encontrado!");
-            confirmar.setContentText("O cpf de numero: " + cpf.substring(0, 3) + "." + cpf.substring(3 , 6)+ "." + cpf.substring(6, 9) + "-" + cpf.substring(9) + " não foi encontrado, quer cadastrá-lo");
+            confirmar.setContentText("O cpf de numero: " + cpf + " não foi encontrado, quer cadastrá-lo");
 
             ButtonType btnSim = new ButtonType("Sim");
             ButtonType btnNao = new ButtonType("Não", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -183,7 +210,7 @@ public class Home {
             Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION);
             confirmar.setTitle("Atenção");
             confirmar.setHeaderText("Cliente não encontrado!");
-            confirmar.setContentText("O cpf de numero: " + cpf.substring(0, 3) + "." + cpf.substring(3 , 6)+ "." + cpf.substring(6, 9) + "-" + cpf.substring(9) + " não foi encontrado, quer cadastrá-lo");
+            confirmar.setContentText("O cpf de numero: " + cpf + " não foi encontrado, quer cadastrá-lo");
 
             ButtonType btnSim = new ButtonType("Sim");
             ButtonType btnNao = new ButtonType("Não", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);

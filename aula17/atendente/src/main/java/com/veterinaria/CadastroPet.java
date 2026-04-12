@@ -179,16 +179,13 @@ public LocalDate fromString(String texto) {
                     CadastroCliente.mostarNaTela("Faltam dados do Pet!", "Por favor, preencha todos os campos para cadastrar o pet.");
                 }else if(dpIdade.getValue() == null){
                     CadastroCliente.mostarNaTela("Data de nascimento inválida!", "Por favor, preencha a data de nascimento com uma data válida.");
-                }/*else{
-                    if(!dataIdade.matches("\\d{2}-\\d{2}-\\d{4}")){
-
-                        Alert avisonum = new Alert(Alert.AlertType.WARNING);
-                        
-                        avisonum.setTitle("Erro");
-                        avisonum.setHeaderText("Erro de Preenchimento");
-                        avisonum.setContentText("Preencha o campo data de nascimento com uma data válida (formato: DD/MM/AAAA)");
-                        avisonum.showAndWait();
-                    }*/else{
+                }
+                else{
+                     int idadeNum = LocalDate.now().getYear() - dpIdade.getValue().getYear();
+                        if(idadeNum < 0 || idadeNum > 100){
+                        CadastroCliente.mostarNaTela("Idade do pet inválida!", "Por favor, preencha a data de nascimento com uma data válida. O pet deve ter entre 0 e 100 anos.");
+                        return;
+                        }
 
                          Pet pet = CadastroPet.dadosPet();
                          listaPet.add(pet);
@@ -210,7 +207,7 @@ public LocalDate fromString(String texto) {
                 }
                 
                 
-        });
+    });
         //fimCadastro
         
 

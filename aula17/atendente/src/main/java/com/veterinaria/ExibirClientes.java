@@ -1,15 +1,15 @@
 package com.veterinaria;
 
+import java.util.Comparator;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -17,6 +17,12 @@ public class ExibirClientes {
     public static Parent criarCena(){
         Accordion sanfonaClientes = new Accordion();
         sanfonaClientes.setMaxWidth(500);
+
+        // 1. Limpa a sanfona velha
+        sanfonaClientes.getPanes().clear(); 
+
+        // 2. ORDENA O BANCO DE DADOS EM ORDEM ALFABÉTICA!
+        BancoDeDados.getClientes().sort(Comparator.comparing(Cliente::getNome, String.CASE_INSENSITIVE_ORDER));
 
     // 2. Passa por cada cliente no banco de dados
     for (Cliente cliente : BancoDeDados.getClientes()) {

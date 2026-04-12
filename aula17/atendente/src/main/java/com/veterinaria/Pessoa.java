@@ -69,15 +69,13 @@ public abstract class Pessoa {
         return telefone;
     }
 
-    public String exibeCpf(){
-        return getCpf().substring(0, 3) + "." + getCpf().substring(3 , 6)+ "." + getCpf().substring(6, 9) + "-" + getCpf().substring(9);
-    }
+    
 
     public String exibeDados(){
         return "\nDados da pessoa:" +
         "\nNome: " + getNome() +
         "\nIdade: " + getIdade() +
-        "\ncpf: " + exibeCpf() +
+        "\ncpf: " + getCpf() +
         this.endereço.exibeEndereço() +
         this.telefone.exibeTelefone() +
         "\nEmail: " + getEmail() + "\n";

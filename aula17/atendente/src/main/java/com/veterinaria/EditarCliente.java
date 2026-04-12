@@ -72,6 +72,7 @@ public class EditarCliente {
         Label lblIdade = new Label("Data de Nascimento:");
         dpIdade = new DatePicker();
         dpIdade.setMaxWidth(150);
+        dpIdade.setPromptText("dd/mm/aaaa");
         TextField editorData = dpIdade.getEditor();
 
         // 2. Cria o "Ouvinte" que espia tudo o que é digitado em tempo real
@@ -146,20 +147,46 @@ public class EditarCliente {
         
         txtCpf.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
 
-        if (valorNovo.length() > 11) {
-            txtCpf.setText(valorAntigo);
-        }   
-    
-        if (!valorNovo.matches("\\d*")) {
-            txtCpf.setText(valorNovo.replaceAll("[^\\d]", ""));
-        }
+        if (valorNovo == null) return;
+
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 11 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 11) {
+                apenasNumeros = apenasNumeros.substring(0, 11);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 3 || i == 6){
+                    formatado.append("-");
+                }else if (i == 9){
+                    formatado.append(".");
+                }
+
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    txtCpf.setText(formatado.toString());
+                    txtCpf.positionCaret(formatado.length()); 
+                });
+            }
          });
         //HBox linhaCpf = new HBox(10);
         //linhaCpf.getChildren().addAll(lblCpf, txtCpf);
 
         Label lblEmail = new Label("Email:");
         txtEmail = new TextField();
+        txtEmail.setPromptText("exemplo@email.com");
         txtEmail.setMaxWidth(150);
+        
         //HBox linhaEmail = new HBox(10);
         //linhaEmail.getChildren().addAll(lblEmail, txtEmail);
 
@@ -179,15 +206,38 @@ public class EditarCliente {
 
         Label lblTelefone = new Label("Telefone:");
         txtTelefone = new TextField();
+        txtTelefone.setPromptText("99999-9999");
         txtTelefone.setMaxWidth(150);
         txtTelefone.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
-            if (valorNovo.length() > 9) {
-            txtTelefone.setText(valorAntigo);
-        }   
+            if (valorNovo == null) return;
 
-        if (!valorNovo.matches("\\d*")) {
-            txtTelefone.setText(valorNovo.replaceAll("[^\\d]", ""));
-        }
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 9 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 9) {
+                apenasNumeros = apenasNumeros.substring(0, 9);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 5){
+                    formatado.append("-");
+                }
+
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    txtTelefone.setText(formatado.toString());
+                    txtTelefone.positionCaret(formatado.length()); 
+                });
+            }
          });
         //HBox linhaTelefone = new HBox(10);
         //linhaTelefone.getChildren().addAll(lblTelefone, txtTelefone);
@@ -252,16 +302,39 @@ public class EditarCliente {
 
         Label lblCep = new Label("Cep:");
         txtCep = new TextField();
+        txtCep.setPromptText("00000-000");
         txtCep.setMaxWidth(150);
         txtCep.textProperty().addListener((observable, valorAntigo, valorNovo) -> {
 
-        if (valorNovo.length() > 8) {
-            txtCep.setText(valorAntigo);
-        }   
+        if (valorNovo == null) return;
 
-        if (!valorNovo.matches("\\d*")) {
-            txtCep.setText(valorNovo.replaceAll("[^\\d]", ""));
-        }
+            // Remove tudo que não for número (Impede o usuário de digitar letras)
+            String apenasNumeros = valorNovo.replaceAll("[^\\d]", "");
+
+            // Limita a 11 números no máximo (ddMMyyyy)
+            if (apenasNumeros.length() > 8) {
+                apenasNumeros = apenasNumeros.substring(0, 8);
+            }
+
+            // Monta o texto colocando a barra nas posições certas
+            StringBuilder formatado = new StringBuilder();
+            for (int i = 0; i < apenasNumeros.length(); i++) {
+                if (i == 5){
+                    formatado.append("-");
+                }
+
+                formatado.append(apenasNumeros.charAt(i));
+            }
+
+            // Se o texto digitado for diferente da máscara, ele substitui e joga o cursor pro final
+            if (!valorNovo.equals(formatado.toString())) {
+                
+                // O Platform.runLater é um truque para o JavaFX não bugar a posição do cursor no teclado
+                javafx.application.Platform.runLater(() -> {
+                    txtCep.setText(formatado.toString());
+                    txtCep.positionCaret(formatado.length()); 
+                });
+            }
          });
         //HBox linhaCep = new HBox(10);
         //linhaCep.getChildren().addAll(lblCep, txtCep);

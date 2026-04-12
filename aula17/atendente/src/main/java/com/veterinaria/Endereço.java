@@ -46,15 +46,13 @@ public class Endereço {
     public void setRua(String rua) {
         this.rua = rua;
     }
-    public String exibeCep(){
-        return getCep().substring(0, 5) + "-" + getCep().substring(5);
-    }
+    
 
     public String exibeEndereço(){
         return "\nRua: " + getRua() +
         "\nBairro: " + getBairro() +
         "\nNumero: " + getNumero() +
-        "\nCep: " + exibeCep() +
+        "\nCep: " + getCep() +
         "\nComplemento: " + getComplemento() + "\n";
     }
     

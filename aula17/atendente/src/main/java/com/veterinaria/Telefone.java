@@ -22,12 +22,9 @@ public class Telefone {
         return numero;
     }
 
-    public String exibeNumero(){
-        return getNumero().substring(0, 5) + "-" + getNumero().substring(5);
-    }
-
+    
     public String exibeTelefone(){
-        return "Telefone: (" + getDdd() + ") " + exibeNumero();
+        return "Telefone: (" + getDdd() + ") " + getNumero();
     }
     
 }
