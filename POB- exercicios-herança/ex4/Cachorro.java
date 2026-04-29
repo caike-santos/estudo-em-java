@@ -1,7 +1,7 @@
 package ex4;
 
-public class Cachoro extends Animal{
-     public Cachoro(String n){
+public class Cachorro extends Animal{
+     public Cachorro(String n){
         super(n);
     }
 

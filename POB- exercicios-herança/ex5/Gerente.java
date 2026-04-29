@@ -1,6 +1,6 @@
 package ex5;
 
-public class Gerente extends Funcionario{
+public class Gerente extends Funcionario implements Autenticavel{
     
     private String departamento;
 
@@ -25,6 +25,9 @@ public class Gerente extends Funcionario{
         this.departamento = departamento;
     }
         
-        
+    @Override
+    public void exibir() {
+        System.out.println("Autenticando gerente...");
+    }    
     
 }
