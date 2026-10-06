@@ -26,7 +26,7 @@ public class FilterTaskAuth extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
             var servletPath = request.getServletPath();
-                if(servletPath.equals("/tarefa/cadastrar")){
+                if(servletPath.startsWith("/tarefa")){
                     var authorization = request.getHeader("Authorization");
 
                     var codigoLimpo = authorization.substring("Basic".length()).trim();
@@ -47,7 +47,7 @@ public class FilterTaskAuth extends OncePerRequestFilter{
 
                         if(verificaçaoSenha.verified){
                             System.out.println("passou");
-                            request.setAttribute("idUser", user.getId())
+                            request.setAttribute("idUser", user.getId());
                             filterChain.doFilter(request, response);
                         }else{
                             response.sendError(401);

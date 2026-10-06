@@ -26,7 +26,7 @@ public class UsuarioController {
         this.usuarioRepository = usuarioRepository;
     }
     
-    @PostMapping("/cadastrar")
+    @PostMapping("")
     public ResponseEntity<String> cadastrarUsuario(@RequestBody @NonNull UsuarioTeste user ) {
         if(usuarioRepository.findByNome(user.getNome()) != null){
             System.err.println("Nome já utilizado");
