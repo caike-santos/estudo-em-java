@@ -1,8 +1,10 @@
 package com.faculdade.teste.controller;
+import com.faculdade.teste.utils.Utils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,12 +73,10 @@ public class TarefaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Tarefa> atualizarTarefa(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request, @PathVariable UUID id){
-        if(!tarefaRepository.existsById(id)){
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
-        }
-        var idUser = request.getAttribute("idUser");
-        tarefa.setId(id);
-        tarefa.setIdUsuario((UUID) idUser);
+        var tarefaAntiga = tarefaRepository.findById(id)
+        .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+        
+        Utils.copyNonNullProperties(tarefa, tarefaAntiga);
         
         tarefaRepository.save(tarefa);
         return ResponseEntity.status(HttpStatus.OK).body(tarefa);
