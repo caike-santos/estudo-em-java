@@ -14,6 +14,6 @@ import java.util.Optional;
 public interface TarefaRepository extends JpaRepository<Tarefa, UUID>{
     Tarefa findByTitulo(String titulo);
     
-    List<Tarefa> findByIdUser(UUID idUser);
+    List<Tarefa> findByIdUsuario(UUID idUser);
     Optional<Tarefa> findById(UUID id);
 }

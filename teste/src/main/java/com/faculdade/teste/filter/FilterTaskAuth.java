@@ -28,6 +28,10 @@ public class FilterTaskAuth extends OncePerRequestFilter{
             var servletPath = request.getServletPath();
                 if(servletPath.startsWith("/tarefa")){
                     var authorization = request.getHeader("Authorization");
+                    if(authorization == null || !authorization.startsWith("Basic ")){
+                        response.sendError(401);
+                        return;
+                    }
 
                     var codigoLimpo = authorization.substring("Basic".length()).trim();
 

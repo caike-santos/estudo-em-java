@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -67,7 +68,7 @@ public class TarefaController {
     @GetMapping("")
     public ResponseEntity<List<Tarefa>> listarTarefas(HttpServletRequest request){
         var idUser = request.getAttribute("idUser");
-        var tarefas = tarefaRepository.findByIdUser((UUID) idUser);
+        var tarefas = tarefaRepository.findByIdUsuario((UUID) idUser);
         return  ResponseEntity.status(HttpStatus.OK).body(tarefas);
     }
 
@@ -75,10 +76,35 @@ public class TarefaController {
     public ResponseEntity<Tarefa> atualizarTarefa(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request, @PathVariable UUID id){
         var tarefaAntiga = tarefaRepository.findById(id)
         .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        var idUser = request.getAttribute("idUser");
+        if(!tarefaAntiga.getIdUsuario().equals(idUser)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O usuario não tem permissão para alterar essa tarefa");
+        }
+
+        if(Utils.getNullPropertiesNames(tarefa).length > 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Atributos faltando");
+        }
         
         Utils.copyNonNullProperties(tarefa, tarefaAntiga);
         
-        tarefaRepository.save(tarefa);
-        return ResponseEntity.status(HttpStatus.OK).body(tarefa);
+        tarefaRepository.save(tarefaAntiga);
+        return ResponseEntity.status(HttpStatus.OK).body(tarefaAntiga);
+    }
+
+    @PatchMapping("/{id}")
+     public ResponseEntity<Tarefa> atualizarTarefaParcialmente(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request, @PathVariable UUID id){
+        var tarefaAntiga = tarefaRepository.findById(id)
+        .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        var idUser = request.getAttribute("idUser");
+        if(!tarefaAntiga.getIdUsuario().equals(idUser)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O usuario não tem permissão para alterar essa tarefa");
+        }
+        
+        Utils.copyNonNullProperties(tarefa, tarefaAntiga);
+        
+        tarefaRepository.save(tarefaAntiga);
+        return ResponseEntity.status(HttpStatus.OK).body(tarefaAntiga);
     }
 }
