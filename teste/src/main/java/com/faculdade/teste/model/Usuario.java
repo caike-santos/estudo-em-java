@@ -1,5 +1,6 @@
 package com.faculdade.teste.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import lombok.Data;
 
 @Data
 @Entity(name = "usuario")
-public class UsuarioTeste {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,7 +25,7 @@ public class UsuarioTeste {
     private String nome;
 
     @Column(nullable = true)
-    private Integer idade;
+    private LocalDate dataNascimento;
 
     @Column(nullable = false)
     private String senha;
@@ -32,7 +33,7 @@ public class UsuarioTeste {
     @CreationTimestamp
     private LocalDateTime dataCriacao;
     
-    public UsuarioTeste(){}
+    public Usuario(){}
 
     
 }

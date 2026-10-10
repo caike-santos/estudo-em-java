@@ -3,23 +3,26 @@ package com.faculdade.teste.filter;
 import java.io.IOException;
 import java.util.Base64;
 
-
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.faculdade.teste.model.UsuarioTeste;
+import com.faculdade.teste.model.Usuario;
 import com.faculdade.teste.repository.UsuarioRepository;
-import at.favre.lib.crypto.bcrypt.BCrypt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j 
 @Component
 public class FilterTaskAuth extends OncePerRequestFilter{
     private UsuarioRepository usuarioRepository;
+    private PasswordEncoder passwordEncoder;
 
-    public FilterTaskAuth(UsuarioRepository usuarioRepository){
+    public FilterTaskAuth(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder){
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -29,6 +32,7 @@ public class FilterTaskAuth extends OncePerRequestFilter{
                 if(servletPath.startsWith("/tarefa")){
                     var authorization = request.getHeader("Authorization");
                     if(authorization == null || !authorization.startsWith("Basic ")){
+                        log.warn("Tentativa de acesso não autorizada na rota: {}", servletPath);
                         response.sendError(401);
                         return;
                     }
@@ -43,23 +47,25 @@ public class FilterTaskAuth extends OncePerRequestFilter{
                     String nome = campos[0];
                     String senha = campos[1];
                     
-                    UsuarioTeste user = usuarioRepository.findByNome(nome);
+                    Usuario user = usuarioRepository.findByNome(nome);
                     if(user == null){
+                        log.warn("Tentativa de autenticação com usuário inexistente: {}", nome);
                         response.sendError(401);
                     }else{
-                        var verificaçaoSenha = BCrypt.verifyer().verify(senha.toCharArray(), user.getSenha());
+                        
 
-                        if(verificaçaoSenha.verified){
-                            System.out.println("passou");
-                            request.setAttribute("idUser", user.getId());
+                        if(passwordEncoder.matches(senha, user.getSenha())){
+                            log.info("Usuário [{}] autenticado com sucesso para {}", nome, servletPath);
+                            request.setAttribute("idUsuario", user.getId());
                             filterChain.doFilter(request, response);
                         }else{
+                            log.warn("Falha de autenticação: senha incorreta para usuário [{}]", nome);
                             response.sendError(401);
                         }
                     }
 
     }else{
-        System.out.println("passou direto");
+        log.debug("Rota pública acessada, passando direto pelo filtro: {}", servletPath);
         filterChain.doFilter(request, response);
     }
     }

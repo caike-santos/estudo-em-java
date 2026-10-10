@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.faculdade.teste.model.UsuarioTeste;
+import com.faculdade.teste.model.Usuario;
 
 
-public interface UsuarioRepository extends JpaRepository<UsuarioTeste, UUID> {
-    UsuarioTeste findByNome(String nome);
+public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
+    Usuario findByNome(String nome);
 }

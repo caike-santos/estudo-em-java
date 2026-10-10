@@ -1,14 +1,8 @@
 package com.faculdade.teste.controller;
-import com.faculdade.teste.utils.Utils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,93 +12,50 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.faculdade.teste.model.Tarefa;
-import com.faculdade.teste.repository.TarefaRepository;
-import com.faculdade.teste.repository.UsuarioRepository;
-
-import io.micrometer.common.lang.NonNull;
+import com.faculdade.teste.dto.TarefaPatchDto;
+import com.faculdade.teste.dto.TarefaRequestDto;
+import com.faculdade.teste.dto.TarefaResponseDto;
+import com.faculdade.teste.service.TarefaService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tarefa")
 public class TarefaController {
-    private final TarefaRepository tarefaRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final TarefaService tarefaService;
 
-    TarefaController(TarefaRepository tarefaRepository, UsuarioRepository usuarioRepository) {
-        this.tarefaRepository = tarefaRepository;
-        this.usuarioRepository = usuarioRepository;
+    TarefaController(TarefaService tarefaService) {
+        this.tarefaService = tarefaService;
     }
-    @PostMapping("")
-    public ResponseEntity<String> cadastrarTarefa(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request){
-        var idUser = request.getAttribute("idUser");
-        tarefa.setIdUsuario(UUID.fromString(idUser.toString()));
+    @PostMapping
+    public ResponseEntity<TarefaResponseDto> cadastrarTarefa(@RequestBody @Valid TarefaRequestDto dto, HttpServletRequest request){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.cadastrar(dto, idUsuario); 
 
-        if(usuarioRepository.findById(tarefa.getIdUsuario()).isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario nao existe");
-        }
-
-        if(tarefaRepository.findByTitulo(tarefa.getTitulo()) != null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Titulo já existente");
-        }
-
-        var DataAtual = LocalDateTime.now();
-        if(DataAtual.isAfter(tarefa.getInicio()) || DataAtual.isAfter(tarefa.getTermino())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A data de inicio/termino tem que ser maior que a data atual");
-        }
-
-        if(tarefa.getInicio().isAfter(tarefa.getTermino())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A data de inicio tem que ser menor que a data de termino");
-        }
-
-        
-        tarefaRepository.save(tarefa);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Tarefa criada");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<Tarefa>> listarTarefas(HttpServletRequest request){
-        var idUser = request.getAttribute("idUser");
-        var tarefas = tarefaRepository.findByIdUsuario((UUID) idUser);
-        return  ResponseEntity.status(HttpStatus.OK).body(tarefas);
+    @GetMapping
+    public ResponseEntity<List<TarefaResponseDto>> listarTarefas(HttpServletRequest request){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        List<TarefaResponseDto> response = tarefaService.listar(idUsuario);
+
+        return  ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tarefa> atualizarTarefa(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request, @PathVariable UUID id){
-        var tarefaAntiga = tarefaRepository.findById(id)
-        .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+    public ResponseEntity<TarefaResponseDto> atualizarTarefa(@RequestBody @Valid TarefaRequestDto dto, HttpServletRequest request, @PathVariable UUID id){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.atualizar(dto, idUsuario, id);
 
-        var idUser = request.getAttribute("idUser");
-        if(!tarefaAntiga.getIdUsuario().equals(idUser)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O usuario não tem permissão para alterar essa tarefa");
-        }
-
-        if(Utils.getNullPropertiesNames(tarefa).length > 0){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Atributos faltando");
-        }
-        
-        Utils.copyNonNullProperties(tarefa, tarefaAntiga);
-        
-        tarefaRepository.save(tarefaAntiga);
-        return ResponseEntity.status(HttpStatus.OK).body(tarefaAntiga);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PatchMapping("/{id}")
-     public ResponseEntity<Tarefa> atualizarTarefaParcialmente(@RequestBody @NonNull Tarefa tarefa, HttpServletRequest request, @PathVariable UUID id){
-        var tarefaAntiga = tarefaRepository.findById(id)
-        .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+     public ResponseEntity<TarefaResponseDto> atualizarTarefaParcialmente(@RequestBody @Valid TarefaPatchDto dto, HttpServletRequest request, @PathVariable UUID id){
+       UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.atualizar(dto, idUsuario, id);
 
-        var idUser = request.getAttribute("idUser");
-        if(!tarefaAntiga.getIdUsuario().equals(idUser)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O usuario não tem permissão para alterar essa tarefa");
-        }
-        
-        Utils.copyNonNullProperties(tarefa, tarefaAntiga);
-        
-        tarefaRepository.save(tarefaAntiga);
-        return ResponseEntity.status(HttpStatus.OK).body(tarefaAntiga);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
