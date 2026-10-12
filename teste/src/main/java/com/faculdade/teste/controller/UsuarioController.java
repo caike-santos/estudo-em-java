@@ -1,15 +1,19 @@
 package com.faculdade.teste.controller;
 
+import com.faculdade.teste.helper.UsuarioModelAssembler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.faculdade.teste.dto.LoginRequestDto;
 import com.faculdade.teste.dto.LoginResponseDto;
+
 import com.faculdade.teste.dto.UsuarioRequestDto;
 import com.faculdade.teste.dto.UsuarioResponseDto;
 import com.faculdade.teste.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
+
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,17 +27,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    private final UsuarioModelAssembler usuarioModelAssembler;
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UsuarioModelAssembler usuarioModelAssembler) {
         this.usuarioService = usuarioService;
+        this.usuarioModelAssembler = usuarioModelAssembler;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDto> exibirUsuario(@PathVariable UUID id, HttpServletRequest request) {
+    public ResponseEntity<EntityModel<UsuarioResponseDto>> buscarUsuario(@PathVariable UUID id, HttpServletRequest request) {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
         UsuarioResponseDto response = usuarioService.exibir(id, idUsuario);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(usuarioModelAssembler.toModel(response));
     }
 
     @PostMapping("/login")
@@ -43,17 +49,17 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDto> cadastrarUsuario(@RequestBody @Valid UsuarioRequestDto dto) {
+    public ResponseEntity<EntityModel<UsuarioResponseDto>> cadastrarUsuario(@RequestBody @Valid UsuarioRequestDto dto) {
         UsuarioResponseDto response = usuarioService.cadastrar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioModelAssembler.toModel(response));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDto> alterarUsuario(@PathVariable UUID id, HttpServletRequest request,
+    public ResponseEntity<EntityModel<UsuarioResponseDto>> atualizarUsuario(@PathVariable UUID id, HttpServletRequest request,
             @RequestBody UsuarioRequestDto dto) {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
         UsuarioResponseDto response = usuarioService.alterar(dto, id, idUsuario);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(usuarioModelAssembler.toModel(response));
     }
 
     @DeleteMapping("/{id}")

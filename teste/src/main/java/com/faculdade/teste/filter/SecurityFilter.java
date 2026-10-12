@@ -15,52 +15,53 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-@Slf4j 
-@Component
-public class SecurityFilter extends OncePerRequestFilter{
-    
-    private final TokenService tokenService;
-    private UsuarioRepository usuarioRepository;
-    
 
-    public SecurityFilter(UsuarioRepository usuarioRepository,  TokenService tokenService){
+@Slf4j
+@Component
+public class SecurityFilter extends OncePerRequestFilter {
+
+    private final TokenService tokenService;
+    private final UsuarioRepository usuarioRepository;
+
+    public SecurityFilter(UsuarioRepository usuarioRepository, TokenService tokenService) {
         this.usuarioRepository = usuarioRepository;
         this.tokenService = tokenService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
 
-            String token = recuperarToken(request);
+        String token = recuperarToken(request);
 
-            if(token != null){
-                String subject = tokenService.validarToken(token);
+        if (token != null) {
+            String subject = tokenService.validarToken(token);
 
-                if(subject != null){
-                    UUID idUsuario = UUID.fromString(subject);
-                    Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+            if (subject != null) {
+                UUID idUsuario = UUID.fromString(subject);
+                Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
 
-                    if(usuario != null){
-                        var authentication = new UsernamePasswordAuthenticationToken(usuario, null, Collections.emptyList());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                         log.info("Usuário [{}] autenticado com sucesso ", usuario.getNome());
-                        request.setAttribute("idUsuario", usuario.getId());
-                    }
+                if (usuario != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(usuario, null,
+                            Collections.emptyList());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info("Usuário [{}] autenticado com sucesso ", usuario.getNome());
+                    request.setAttribute("idUsuario", usuario.getId());
                 }
             }
-            log.debug("Rota pública acessada, passando direto pelo filtro");
-            filterChain.doFilter(request, response);
+        } 
+            
+        filterChain.doFilter(request, response);
     }
 
-    private String recuperarToken(HttpServletRequest request){
+    private String recuperarToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
 
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
 
         return authHeader.replace("Bearer ", "").trim();
     }
-    
+
 }

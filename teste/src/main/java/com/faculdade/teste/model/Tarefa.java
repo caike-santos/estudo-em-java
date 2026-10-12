@@ -34,7 +34,7 @@ public class Tarefa {
     private UUID idUsuario;
 
     @CreationTimestamp
-    private LocalDateTime DataCriada;
+    private LocalDateTime dataCriada;
 
     public Tarefa(){}
 
