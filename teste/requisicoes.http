@@ -1,0 +1,107 @@
+### ========================================================
+### ARQUIVO DE TESTE DE REQUISIÇÕES (INTELLIJ HTTP CLIENT)
+### Basta clicar na setinha verde (▶) ao lado de cada rota!
+### ========================================================
+
+@baseUrl = http://localhost:8080
+
+### 1. Cadastrar Novo Usuário (PÚBLICO)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "caike",
+  "senha": "senhaForte123",
+  "dataNascimento": "2006-01-03"
+}
+
+### 2. Login (Gera e Salva o Token JWT Automaticamente!)
+POST {{baseUrl}}/usuarios/login
+Content-Type: application/json
+
+{
+  "nome": "caike",
+  "senha": "senhaForte123"
+}
+
+> {%
+    // O IntelliJ salva o token retornado na variável global 'token'
+    client.global.set("token", response.body.token);
+    client.log("Token JWT capturado com sucesso: " + response.body.token);
+%}
+
+### 3. Consultar Dados do Usuário por ID (PROTEGIDO)
+# Substitua o UUID abaixo pelo ID retornado no cadastro do seu usuário
+GET {{baseUrl}}/usuarios/COLOQUE_O_UUID_DO_USUARIO_AQUI
+Authorization: Bearer {{token}}
+
+### 4. Atualizar Dados do Usuário (PATCH)
+PATCH {{baseUrl}}/usuarios/COLOQUE_O_UUID_DO_USUARIO_AQUI
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "caike_atualizado",
+  "senha": "novaSenha123"
+}
+
+### 5. Cadastrar Nova Tarefa (PROTEGIDO COM JWT)
+POST {{baseUrl}}/tarefas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Estudar Spring Boot no IntelliJ",
+  "descricao": "Praticar testes de API com HATEOAS e JWT",
+  "inicio": "2026-10-15T10:00:00",
+  "termino": "2026-10-14T12:00:00"
+}
+
+> {%
+    // Salva o ID da tarefa criada na variável 'idTarefa' para os próximos testes
+    client.global.set("idTarefa", response.body.id);
+    client.log("ID da Tarefa capturado: " + response.body.id);
+%}
+
+### 6. Listar Todas as Tarefas do Usuário Autenticado
+GET {{baseUrl}}/tarefas
+Authorization: Bearer {{token}}
+
+### 7. Consultar Tarefa por ID (com links HATEOAS)
+GET {{baseUrl}}/tarefas/{{idTarefa}}
+Authorization: Bearer {{token}}
+
+### 8. Atualizar Tarefa Completamente (PUT)
+PUT {{baseUrl}}/tarefas/{{idTarefa}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Estudo de Spring Boot Finalizado",
+  "descricao": "Tarefa totalmente atualizada via PUT",
+  "inicio": "2026-10-15T10:00:00",
+  "termino": "2026-10-15T14:00:00"
+}
+
+### 9. Atualizar Tarefa Parcialmente (PATCH - Apenas o Título)
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Título Alterado via PATCH"
+}
+
+### 10. Teste de Erro de Validação (Campos vazios para testar o Global Exception Handler)
+POST {{baseUrl}}/tarefas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "",
+  "descricao": ""
+}
+
+### 11. Deletar Tarefa
+DELETE {{baseUrl}}/tarefas/{{idTarefa}}
+Authorization: Bearer {{token}}
