@@ -3,6 +3,7 @@ package com.faculdade.teste.helper;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -27,4 +28,9 @@ public class TarefaModelAssembler implements RepresentationModelAssembler<Tarefa
                 linkTo(methodOn(TarefaController.class).deletarTarefa(dto.id(), null)).withRel("deletar"));
     }
 
+    @Override
+    public CollectionModel<EntityModel<TarefaResponseDto>> toCollectionModel(Iterable<? extends TarefaResponseDto> entities) {
+        return RepresentationModelAssembler.super.toCollectionModel(entities)
+                .add(linkTo(methodOn(TarefaController.class).listarTarefas(null)).withSelfRel());
+    }
 }
