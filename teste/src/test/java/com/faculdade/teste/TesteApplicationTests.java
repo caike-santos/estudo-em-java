@@ -3,6 +3,9 @@ package com.faculdade.teste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.faculdade.teste.dto.*;
+import com.faculdade.teste.model.Prioridade;
+import lombok.Data;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -23,10 +26,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.faculdade.teste.dto.LoginRequestDto;
-import com.faculdade.teste.dto.TarefaPatchDto;
-import com.faculdade.teste.dto.TarefaRequestDto;
-import com.faculdade.teste.dto.UsuarioRequestDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,6 +44,7 @@ class TesteApplicationTests {
     private static String token;
     private static String idUsuario;
     private static String idTarefa;
+    private static String idSubtarefa;
 
     @Test
     @Order(1)
@@ -92,6 +92,7 @@ class TesteApplicationTests {
         TarefaRequestDto dto = new TarefaRequestDto(
                 "Minha Primeira Tarefa",
                 "Descrição detalhada da tarefa de teste",
+                Prioridade.ALTA,
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2)
         );
@@ -104,6 +105,10 @@ class TesteApplicationTests {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.titulo").value("Minha Primeira Tarefa"))
                 .andExpect(jsonPath("$._links.self.href").exists())
+                .andExpect(jsonPath("$.status").value("PENDENTE"))
+                .andExpect(jsonPath("$._links.iniciar.href").exists())
+                .andExpect(jsonPath("$._links.concluir.href").exists())
+                .andExpect(jsonPath("$._links.cancelar.href").exists())
                 .andReturn();
 
         JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
@@ -141,6 +146,7 @@ class TesteApplicationTests {
         TarefaRequestDto dto = new TarefaRequestDto(
                 "Tarefa Atualizada Completa",
                 "Nova descrição da tarefa",
+                Prioridade.URGENTE,
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(3)
         );
@@ -159,6 +165,7 @@ class TesteApplicationTests {
     void deveAtualizarTarefaParcial() throws Exception {
         TarefaPatchDto patchDto = new TarefaPatchDto(
                 "Tarefa Título Patch",
+                null,
                 null,
                 null,
                 null
@@ -182,10 +189,100 @@ class TesteApplicationTests {
 
     @Test
     @Order(9)
-    @DisplayName("9. Deve deletar uma tarefa com sucesso (DELETE /tarefas/{id})")
+    @DisplayName("9. cadastrar subtarefa")
+    void cadastrarSubtarefa() throws Exception{
+        SubtarefaRequestDto subtarefaRequestDto = new SubtarefaRequestDto("minha subtarefa");
+
+        MvcResult result = mockMvc.perform(post("/tarefas/" + idTarefa +"/subtarefas")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(subtarefaRequestDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.subtarefas").isArray())
+                .andExpect(jsonPath("$.subtarefas[0].id").exists())
+                .andExpect(jsonPath("$.subtarefas[0].titulo").value("minha subtarefa"))
+                .andExpect(jsonPath("$.subtarefas[0].concluida").value(false))
+                .andReturn();
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+        idSubtarefa = jsonNode.get("subtarefas").get(0).get("id").asText();
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("10. concluir subtarefa")
+    void concluirSubtarefa() throws Exception{
+        mockMvc.perform(patch("/tarefas/" + idTarefa +"/subtarefas/" + idSubtarefa + "/concluir")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subtarefas[0].concluida").value(true));
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("11. Deve iniciar uma tarefa e mostrar links HATEOAS (concluir e cancelar)")
+    void deveIniciarUmaTarefa() throws Exception {
+        mockMvc.perform(patch("/tarefas/" + idTarefa + "/iniciar")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EM_ANDAMENTO"))
+                .andExpect(jsonPath("$._links.concluir.href").exists())
+                .andExpect(jsonPath("$._links.cancelar.href").exists());
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("12. Deve concluir uma tarefa e mostrar a data de conclusão")
+    void deveConcluirUmaTarefa() throws Exception {
+        mockMvc.perform(patch("/tarefas/" + idTarefa + "/concluir")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.conclusao").exists())
+                .andExpect(jsonPath("$.status").value("CONCLUIDA"));
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("13. Deve dar erro ao cancelar uma tarefa já concluída")
+    void cancelarTarefaConcluida() throws Exception{
+        mockMvc.perform(patch("/tarefas/" + idTarefa + "/cancelar")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(14)
+    @DisplayName("14. Deve deletar uma tarefa com sucesso (DELETE /tarefas/{id})")
     void deveDeletarTarefa() throws Exception {
         mockMvc.perform(delete("/tarefas/" + idTarefa)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Order(15)
+    @DisplayName("15. Deve cancelar uma tarefa")
+    void cancelarTarefa() throws Exception{
+        TarefaRequestDto dto = new TarefaRequestDto(
+                "Minha Segunda Tarefa",
+                "Descrição detalhada da tarefa de teste",
+                Prioridade.ALTA,
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2)
+        );
+
+        MvcResult result = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        JsonNode jsonNode = objectMapper.readTree(result.getResponse().getContentAsString());
+        String idTarefaNova = jsonNode.get("id").asText();
+
+        mockMvc.perform(patch("/tarefas/" + idTarefaNova + "/cancelar")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADA"));
     }
 }

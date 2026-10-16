@@ -2,6 +2,7 @@ package com.faculdade.teste.dto;
 
 import java.time.LocalDateTime;
 
+import com.faculdade.teste.model.Prioridade;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,6 +13,7 @@ public record TarefaRequestDto(
     String titulo,
     @NotBlank(message =  "A descrição é obrigatória")
     String descricao,
+    Prioridade prioridade,
     @NotNull(message = "A data/hora de inicio é obrigatória")
     LocalDateTime inicio,
     @NotNull(message = "A data/hora de termino é obrigatória")

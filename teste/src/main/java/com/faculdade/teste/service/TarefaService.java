@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.faculdade.teste.dto.SubtarefaRequestDto;
+import com.faculdade.teste.model.Prioridade;
+import com.faculdade.teste.model.StatusTarefa;
+import com.faculdade.teste.model.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,19 +35,19 @@ public class TarefaService {
 
     public TarefaResponseDto cadastrar(TarefaRequestDto dto, UUID idUsuario) {
 
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao existe"));
+
         Tarefa tarefa = new Tarefa();
-        tarefa.setIdUsuario(idUsuario);
+        tarefa.setUsuario(usuario);
         tarefa.setTitulo(dto.titulo());
         tarefa.setDescricao(dto.descricao());
+        tarefa.setStatus(StatusTarefa.PENDENTE);
+        tarefa.setPrioridade(dto.prioridade() != null ? dto.prioridade() : Prioridade.MEDIA);
         tarefa.setInicio(dto.inicio());
         tarefa.setTermino(dto.termino());
 
-        if (usuarioRepository.findById(tarefa.getIdUsuario()).isEmpty()) {
-            log.warn("Usuario [{}] não foi encontrado no banco de dados!", tarefa.getIdUsuario());
-            throw new IllegalArgumentException("Usuario nao existe");
-        }
-
-        if (tarefaRepository.findByTituloAndIdUsuario(tarefa.getTitulo(), idUsuario) != null) {
+        if (tarefaRepository.findByTituloAndUsuarioId(tarefa.getTitulo(), idUsuario) != null) {
             throw new IllegalArgumentException("Titulo já existente");
         }
 
@@ -65,7 +70,7 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDto> listar(UUID  idUsuario) {
-        List<Tarefa> tarefas = tarefaRepository.findByIdUsuario( idUsuario);
+        List<Tarefa> tarefas = tarefaRepository.findByUsuarioId(idUsuario);
         List<TarefaResponseDto> dto = new ArrayList<>();
 
         for (Tarefa t : tarefas) {
@@ -75,17 +80,8 @@ public class TarefaService {
     }
 
     public TarefaResponseDto buscarPorId(UUID id, UUID idUsuario) {
-        Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Tarefa [{}] não foi encontrada no banco de dados!", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
-                });
-        if (!idUsuario.equals(tarefa.getIdUsuario())) {
-            log.warn("Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!", idUsuario, id,
-                    tarefa.getIdUsuario());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "O usuario não tem permissão para acessar essa informação");
-        }
+        Tarefa tarefa = buscarTarefa(id);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou ler a tarefa [{}] pertencente ao usuário [{}]!");
         return TarefaResponseDto.fromEntity(tarefa);
     }
 
@@ -98,17 +94,11 @@ public class TarefaService {
     }
 
     private TarefaResponseDto atualizarDados(Object dto, UUID idUsuario, UUID id) {
-        Tarefa tarefaAntiga = tarefaRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Tarefa [{}] não foi encontrada no banco de dados!", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
-                });
+        Tarefa tarefaAntiga = buscarTarefa(id);
+        verificarUsuario(tarefaAntiga, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
 
-        if (!tarefaAntiga.getIdUsuario().equals(idUsuario)) {
-            log.warn("Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!", idUsuario, id,
-                    tarefaAntiga.getId());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "O usuario não tem permissão para alterar essa tarefa");
+        if(tarefaAntiga.getStatus() == StatusTarefa.CONCLUIDA || tarefaAntiga.getStatus() == StatusTarefa.CANCELADA){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode alterar uma tarefa já concluída ou cancelada");
         }
 
         Utils.copyNonNullProperties(dto, tarefaAntiga);
@@ -122,21 +112,62 @@ public class TarefaService {
     }
 
     public void deletar(UUID id, UUID idUsuario) {
-        Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Tarefa [{}] não foi encontrada no banco de dados!", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
-                });
-
-        if (!tarefa.getIdUsuario().equals(idUsuario)) {
-            log.warn("Usuário [{}] tentou deletar a tarefa [{}] do usuário [{}]!", idUsuario, tarefa.getId(),
-                    tarefa.getIdUsuario());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "O usuario não tem permissão para deletar essa tarefa");
-        }
-
+        Tarefa tarefa = buscarTarefa(id);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou deletar a tarefa [{}] do usuário [{}]!");
         tarefaRepository.delete(tarefa);
         return;
     }
 
+    public TarefaResponseDto iniciarTarefa(UUID id, UUID idUsuario) {
+        Tarefa tarefa = buscarTarefa(id);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
+        tarefa.iniciar();
+        return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
+    }
+
+    public TarefaResponseDto concluirTarefa(UUID id, UUID idUsuario) {
+        Tarefa tarefa = buscarTarefa(id);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
+        tarefa.concluir();
+        return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
+    }
+
+    public TarefaResponseDto cancelarTarefa(UUID id, UUID idUsuario) {
+        Tarefa tarefa = buscarTarefa(id);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
+        tarefa.cancelar();
+        return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
+    }
+
+    public TarefaResponseDto adicionarSubtarefa(UUID idTarefa, SubtarefaRequestDto dto, UUID idUsuario){
+        Tarefa tarefa = buscarTarefa(idTarefa);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
+        tarefa.adicionarSubtarefa(dto.titulo());
+        return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
+    }
+
+    public TarefaResponseDto concluirSubtarefa(UUID idTarefa, UUID idSubtarefa, UUID idUsuario){
+        Tarefa tarefa = buscarTarefa(idTarefa);
+        verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou alterar a tarefa [{}] pertencente ao usuário [{}]!");
+        tarefa.concluirSubtarefa(idSubtarefa);
+        return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
+    }
+
+    private Tarefa buscarTarefa(UUID id){
+         Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Tarefa [{}] não foi encontrada no banco de dados!", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
+                });
+         return tarefa;
+    }
+
+    private void verificarUsuario(Tarefa tarefa, UUID idUsuario, String msgErro){
+        if (!tarefa.getUsuario().getId().equals(idUsuario)) {
+            log.warn(msgErro, idUsuario, tarefa.getId(),
+                    tarefa.getUsuario().getId());
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "O usuario não tem permissão para acessar essa tarefa");
+        }
+    }
 }

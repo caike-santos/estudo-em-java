@@ -1,8 +1,11 @@
 package com.faculdade.teste.controller;
 
+import com.faculdade.teste.dto.SubtarefaRequestDto;
 import com.faculdade.teste.helper.TarefaModelAssembler;
 import java.util.List;
 import java.util.UUID;
+
+import com.faculdade.teste.model.Tarefa;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -77,5 +80,40 @@ public class TarefaController {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
         tarefaService.deletar(id, idUsuario);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/iniciar")
+    public ResponseEntity<EntityModel<TarefaResponseDto>> iniciarTarefa(HttpServletRequest request, @PathVariable UUID id){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.iniciarTarefa(id, idUsuario);
+        return ResponseEntity.ok(tarefaModelAssembler.toModel(response));
+    }
+
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<EntityModel<TarefaResponseDto>> concluirTarefa(HttpServletRequest request, @PathVariable UUID id){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.concluirTarefa(id, idUsuario);
+        return ResponseEntity.ok(tarefaModelAssembler.toModel(response));
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<EntityModel<TarefaResponseDto>> cancelarTarefa(HttpServletRequest request, @PathVariable UUID id){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.cancelarTarefa(id, idUsuario);
+        return ResponseEntity.ok(tarefaModelAssembler.toModel(response));
+    }
+
+    @PostMapping("/{id}/subtarefas")
+    public ResponseEntity<EntityModel<TarefaResponseDto>> cadastrarSubtarefas(@RequestBody @Valid SubtarefaRequestDto dto,  @PathVariable UUID id, HttpServletRequest request){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.adicionarSubtarefa(id, dto, idUsuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tarefaModelAssembler.toModel(response));
+    }
+
+    @PatchMapping("/{id}/subtarefas/{idSubtarefa}/concluir")
+    public ResponseEntity<EntityModel<TarefaResponseDto>> concluirSubtarefas(@PathVariable UUID id, @PathVariable UUID idSubtarefa, HttpServletRequest request){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        TarefaResponseDto response = tarefaService.concluirSubtarefa(id, idSubtarefa, idUsuario);
+        return ResponseEntity.ok(tarefaModelAssembler.toModel(response));
     }
 }

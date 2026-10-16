@@ -15,6 +15,11 @@ Content-Type: application/json
   "dataNascimento": "2006-01-03"
 }
 
+> {%
+    client.global.set("idUsuario", response.body.id);
+    client.log("ID do Usuário capturado: " + response.body.id);
+%}
+
 ### 2. Login (Gera e Salva o Token JWT Automaticamente!)
 POST {{baseUrl}}/usuarios/login
 Content-Type: application/json
@@ -31,12 +36,11 @@ Content-Type: application/json
 %}
 
 ### 3. Consultar Dados do Usuário por ID (PROTEGIDO)
-# Substitua o UUID abaixo pelo ID retornado no cadastro do seu usuário
-GET {{baseUrl}}/usuarios/COLOQUE_O_UUID_DO_USUARIO_AQUI
+GET {{baseUrl}}/usuarios/{{idUsuario}}
 Authorization: Bearer {{token}}
 
 ### 4. Atualizar Dados do Usuário (PATCH)
-PATCH {{baseUrl}}/usuarios/COLOQUE_O_UUID_DO_USUARIO_AQUI
+PATCH {{baseUrl}}/usuarios/{{idUsuario}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -53,8 +57,9 @@ Content-Type: application/json
 {
   "titulo": "Estudar Spring Boot no IntelliJ",
   "descricao": "Praticar testes de API com HATEOAS e JWT",
-  "inicio": "2026-10-15T10:00:00",
-  "termino": "2026-10-14T12:00:00"
+  "prioridade": "BAIXA",
+  "inicio": "2026-10-20T10:00:00",
+  "termino": "2026-10-20T12:00:00"
 }
 
 > {%
@@ -67,7 +72,7 @@ Content-Type: application/json
 GET {{baseUrl}}/tarefas
 Authorization: Bearer {{token}}
 
-### 7. Consultar Tarefa por ID (com links HATEOAS)
+### 7. Consultar Tarefa por ID (com links HATEOAS dinâmicos)
 GET {{baseUrl}}/tarefas/{{idTarefa}}
 Authorization: Bearer {{token}}
 
@@ -79,20 +84,34 @@ Content-Type: application/json
 {
   "titulo": "Estudo de Spring Boot Finalizado",
   "descricao": "Tarefa totalmente atualizada via PUT",
-  "inicio": "2026-10-15T10:00:00",
-  "termino": "2026-10-15T14:00:00"
+  "prioridade": "URGENTE",
+  "inicio": "2026-10-21T10:00:00",
+  "termino": "2026-10-21T14:00:00"
 }
 
-### 9. Atualizar Tarefa Parcialmente (PATCH - Apenas o Título)
+### 9. Atualizar Tarefa Parcialmente (PATCH - Título e Prioridade)
 PATCH {{baseUrl}}/tarefas/{{idTarefa}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "titulo": "Título Alterado via PATCH"
+  "titulo": "Título Alterado via PATCH",
+  "prioridade": "ALTA"
 }
 
-### 10. Teste de Erro de Validação (Campos vazios para testar o Global Exception Handler)
+### 10. Iniciar Tarefa (Muda status de PENDENTE para EM_ANDAMENTO)
+POST {{baseUrl}}/tarefas/{{idTarefa}}/iniciar
+Authorization: Bearer {{token}}
+
+### 11. Concluir Tarefa (Muda status para CONCLUIDA e preenche data de conclusão)
+POST {{baseUrl}}/tarefas/{{idTarefa}}/concluir
+Authorization: Bearer {{token}}
+
+### 12. Cancelar Tarefa (Se já estiver CONCLUIDA, testará o bloqueio da regra de domínio!)
+POST {{baseUrl}}/tarefas/{{idTarefa}}/cancelar
+Authorization: Bearer {{token}}
+
+### 13. Teste de Erro de Validação (Campos vazios para testar o Global Exception Handler)
 POST {{baseUrl}}/tarefas
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -102,6 +121,6 @@ Content-Type: application/json
   "descricao": ""
 }
 
-### 11. Deletar Tarefa
+### 14. Deletar Tarefa
 DELETE {{baseUrl}}/tarefas/{{idTarefa}}
 Authorization: Bearer {{token}}
