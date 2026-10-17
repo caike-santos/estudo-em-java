@@ -190,10 +190,10 @@ class TesteApplicationTests {
     @Test
     @Order(9)
     @DisplayName("9. cadastrar subtarefa")
-    void cadastrarSubtarefa() throws Exception{
+    void cadastrarSubtarefa() throws Exception {
         SubtarefaRequestDto subtarefaRequestDto = new SubtarefaRequestDto("minha subtarefa");
 
-        MvcResult result = mockMvc.perform(post("/tarefas/" + idTarefa +"/subtarefas")
+        MvcResult result = mockMvc.perform(post("/tarefas/" + idTarefa + "/subtarefas")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(subtarefaRequestDto)))
@@ -209,12 +209,12 @@ class TesteApplicationTests {
 
     @Test
     @Order(10)
-    @DisplayName("10. concluir subtarefa")
-    void concluirSubtarefa() throws Exception{
-        mockMvc.perform(patch("/tarefas/" + idTarefa +"/subtarefas/" + idSubtarefa + "/concluir")
+    @DisplayName("12. Deve dar erro ao concluir uma tarefa com subtarefa pendente")
+    void deveDarErroAoConcluirUmaTarefa() throws Exception {
+        mockMvc.perform(patch("/tarefas/" + idTarefa + "/concluir")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.subtarefas[0].concluida").value(true));
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test
@@ -231,6 +231,17 @@ class TesteApplicationTests {
 
     @Test
     @Order(12)
+    @DisplayName("10. concluir subtarefa")
+    void concluirSubtarefa() throws Exception {
+        mockMvc.perform(patch("/tarefas/" + idTarefa + "/subtarefas/" + idSubtarefa + "/concluir")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subtarefas[0].concluida").value(true));
+    }
+
+
+    @Test
+    @Order(13)
     @DisplayName("12. Deve concluir uma tarefa e mostrar a data de conclusão")
     void deveConcluirUmaTarefa() throws Exception {
         mockMvc.perform(patch("/tarefas/" + idTarefa + "/concluir")
@@ -241,16 +252,16 @@ class TesteApplicationTests {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     @DisplayName("13. Deve dar erro ao cancelar uma tarefa já concluída")
-    void cancelarTarefaConcluida() throws Exception{
+    void cancelarTarefaConcluida() throws Exception {
         mockMvc.perform(patch("/tarefas/" + idTarefa + "/cancelar")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     @DisplayName("14. Deve deletar uma tarefa com sucesso (DELETE /tarefas/{id})")
     void deveDeletarTarefa() throws Exception {
         mockMvc.perform(delete("/tarefas/" + idTarefa)
@@ -259,9 +270,9 @@ class TesteApplicationTests {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     @DisplayName("15. Deve cancelar uma tarefa")
-    void cancelarTarefa() throws Exception{
+    void cancelarTarefa() throws Exception {
         TarefaRequestDto dto = new TarefaRequestDto(
                 "Minha Segunda Tarefa",
                 "Descrição detalhada da tarefa de teste",

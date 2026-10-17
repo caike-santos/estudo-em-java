@@ -68,8 +68,16 @@ Content-Type: application/json
     client.log("ID da Tarefa capturado: " + response.body.id);
 %}
 
-### 6. Listar Todas as Tarefas do Usuário Autenticado
-GET {{baseUrl}}/tarefas
+### 6. Listar Todas as Tarefas do Usuário Autenticado (Paginado)
+GET {{baseUrl}}/tarefas?page=0&size=10&sort=inicio,asc
+Authorization: Bearer {{token}}
+
+### 6.1. Filtrar Tarefas por Status e Prioridade (Nível 3)
+GET {{baseUrl}}/tarefas?status=PENDENTE&prioridade=BAIXA
+Authorization: Bearer {{token}}
+
+### 6.2. Consultar Dashboard de Estatísticas das Tarefas (Nível 3)
+GET {{baseUrl}}/tarefas/estatisticas
 Authorization: Bearer {{token}}
 
 ### 7. Consultar Tarefa por ID (com links HATEOAS dinâmicos)
@@ -99,19 +107,42 @@ Content-Type: application/json
   "prioridade": "ALTA"
 }
 
-### 10. Iniciar Tarefa (Muda status de PENDENTE para EM_ANDAMENTO)
-POST {{baseUrl}}/tarefas/{{idTarefa}}/iniciar
+### 10. Adicionar Subtarefa (Checklist) na Tarefa Principal
+POST {{baseUrl}}/tarefas/{{idTarefa}}/subtarefas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Revisar conceitos de Agregado no DDD"
+}
+
+> {%
+    // Captura automaticamente o ID da primeira subtarefa da lista
+    client.global.set("idSubtarefa", response.body.subtarefas[0].id);
+    client.log("ID da Subtarefa capturado: " + response.body.subtarefas[0].id);
+%}
+
+### 11. Tentar Concluir Tarefa Principal com Subtarefa Pendente (Deve dar erro 400!)
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}/concluir
 Authorization: Bearer {{token}}
 
-### 11. Concluir Tarefa (Muda status para CONCLUIDA e preenche data de conclusão)
-POST {{baseUrl}}/tarefas/{{idTarefa}}/concluir
+### 12. Iniciar Tarefa (Muda status de PENDENTE para EM_ANDAMENTO)
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}/iniciar
 Authorization: Bearer {{token}}
 
-### 12. Cancelar Tarefa (Se já estiver CONCLUIDA, testará o bloqueio da regra de domínio!)
-POST {{baseUrl}}/tarefas/{{idTarefa}}/cancelar
+### 13. Concluir Subtarefa
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}/subtarefas/{{idSubtarefa}}/concluir
 Authorization: Bearer {{token}}
 
-### 13. Teste de Erro de Validação (Campos vazios para testar o Global Exception Handler)
+### 14. Concluir Tarefa Principal (Agora funciona e preenche data de conclusão!)
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}/concluir
+Authorization: Bearer {{token}}
+
+### 15. Cancelar Tarefa (Se já estiver CONCLUIDA, testará o bloqueio da regra de domínio!)
+PATCH {{baseUrl}}/tarefas/{{idTarefa}}/cancelar
+Authorization: Bearer {{token}}
+
+### 16. Teste de Erro de Validação (Campos vazios para testar o Global Exception Handler)
 POST {{baseUrl}}/tarefas
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -121,6 +152,6 @@ Content-Type: application/json
   "descricao": ""
 }
 
-### 14. Deletar Tarefa
+### 17. Deletar Tarefa
 DELETE {{baseUrl}}/tarefas/{{idTarefa}}
 Authorization: Bearer {{token}}

@@ -44,6 +44,12 @@ public class Tarefa {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ElementCollection
+    @CollectionTable(name = "tarefa_historico", joinColumns =
+    @JoinColumn(name = "tarefa_id"))
+    @Column(name = "evento")
+    private List<String> historico = new ArrayList<>();
+
     @CreationTimestamp
     private LocalDateTime dataCriada;
 
@@ -53,6 +59,7 @@ public class Tarefa {
         if(this.status != StatusTarefa.PENDENTE){
             throw new IllegalArgumentException("Apenas tarefas pendentes podem ser iniciadas");
         }
+        this.registrarEvento("Tarefa iniciada");
         this.status = StatusTarefa.EM_ANDAMENTO;
     }
 
@@ -66,6 +73,7 @@ public class Tarefa {
             }
         }
         this.status = StatusTarefa.CONCLUIDA;
+        this.registrarEvento("Tarefa concluída");
         this.conclusao = LocalDateTime.now();
     }
 
@@ -73,6 +81,7 @@ public class Tarefa {
         if(this.status == StatusTarefa.CONCLUIDA || this.status == StatusTarefa.CANCELADA){
             throw new IllegalArgumentException("Tarefas concluídas ou canceladas não podem ser canceladas");
         }
+        this.registrarEvento("Tarefa cancelada");
         this.status = StatusTarefa.CANCELADA;
     }
 
@@ -84,6 +93,7 @@ public class Tarefa {
         subtarefa.setTitulo(titulo);
         subtarefa.setTarefa(this);
         this.subtarefas.add(subtarefa);
+        this.registrarEvento("SubTarefa adicionada: " + titulo);
     }
 
     public void concluirSubtarefa(UUID idSubtarefa){
@@ -94,10 +104,20 @@ public class Tarefa {
         for(Subtarefa s : this.subtarefas){
             if(s.getId().equals(idSubtarefa)){
                 s.setConcluida(true);
+                this.registrarEvento("SubTarefa concluída: " + s.getTitulo());
                 return;
             }
         }
         throw new IllegalArgumentException("Subtarefa não encontrada");
+    }
+
+    public boolean isAtrasada(){
+        return (this.getStatus() == StatusTarefa.PENDENTE || this.getStatus() == StatusTarefa.EM_ANDAMENTO)
+                && this.getTermino().isBefore(LocalDateTime.now());
+    }
+
+    public void registrarEvento(String descricaoEvento){
+        this.historico.add(LocalDateTime.now() + " - " + descricaoEvento);
     }
 
 }

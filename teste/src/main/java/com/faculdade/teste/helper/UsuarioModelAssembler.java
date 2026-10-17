@@ -22,7 +22,7 @@ public class UsuarioModelAssembler implements RepresentationModelAssembler<Usuar
                 
                 linkTo(methodOn(UsuarioController.class).deletarUsuario(dto.id(), null)).withRel("deletar"),
 
-                linkTo(methodOn(TarefaController.class).listarTarefas(null)).withRel("minhas_tarefas"));
+                linkTo(methodOn(TarefaController.class).listarTarefas(null, null, null, null)).withRel("minhas_tarefas"));
 
     }
 

@@ -20,9 +20,10 @@ public record TarefaResponseDto(
     LocalDateTime conclusao,
     UUID idUsuario,
     LocalDateTime dataCriada,
-    List<SubtarefaResponseDto> subtarefas
+    List<SubtarefaResponseDto> subtarefas,
+    List<String> historico
 ) {
     public static TarefaResponseDto fromEntity(Tarefa tarefa){
-        return  new TarefaResponseDto(tarefa.getId(), tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getPrioridade(), tarefa.getStatus(), tarefa.getInicio(), tarefa.getTermino(), tarefa.getConclusao(), tarefa.getUsuario().getId(), tarefa.getDataCriada(), tarefa.getSubtarefas().stream().map(SubtarefaResponseDto::fromEntity).toList());
+        return  new TarefaResponseDto(tarefa.getId(), tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getPrioridade(), tarefa.getStatus(), tarefa.getInicio(), tarefa.getTermino(), tarefa.getConclusao(), tarefa.getUsuario().getId(), tarefa.getDataCriada(), tarefa.getSubtarefas().stream().map(SubtarefaResponseDto::fromEntity).toList(), tarefa.getHistorico());
     }
 }

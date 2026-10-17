@@ -19,7 +19,7 @@ public class TarefaModelAssembler implements RepresentationModelAssembler<Tarefa
         EntityModel<TarefaResponseDto> model = EntityModel.of(dto,
                 linkTo(methodOn(TarefaController.class).buscarTarefa(dto.id(), null)).withSelfRel(),
 
-                linkTo(methodOn(TarefaController.class).listarTarefas(null)).withRel("todas_tarefas"),
+                linkTo(methodOn(TarefaController.class).listarTarefas(null, null, null, null)).withRel("todas_tarefas"),
 
                 linkTo(methodOn(TarefaController.class).atualizarTarefa(null, null, dto.id())).withRel("atualizar"),
                 
@@ -44,6 +44,6 @@ public class TarefaModelAssembler implements RepresentationModelAssembler<Tarefa
     @Override
     public CollectionModel<EntityModel<TarefaResponseDto>> toCollectionModel(Iterable<? extends TarefaResponseDto> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(TarefaController.class).listarTarefas(null)).withSelfRel());
+                .add(linkTo(methodOn(TarefaController.class).listarTarefas(null, null, null, null)).withSelfRel());
     }
 }

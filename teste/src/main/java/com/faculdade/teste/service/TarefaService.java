@@ -1,20 +1,20 @@
 package com.faculdade.teste.service;
 
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.faculdade.teste.dto.SubtarefaRequestDto;
+import com.faculdade.teste.dto.*;
 import com.faculdade.teste.model.Prioridade;
 import com.faculdade.teste.model.StatusTarefa;
 import com.faculdade.teste.model.Usuario;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import com.faculdade.teste.dto.TarefaPatchDto;
-import com.faculdade.teste.dto.TarefaRequestDto;
-import com.faculdade.teste.dto.TarefaResponseDto;
 import com.faculdade.teste.model.Tarefa;
 import com.faculdade.teste.repository.TarefaRepository;
 import com.faculdade.teste.repository.UsuarioRepository;
@@ -64,19 +64,16 @@ public class TarefaService {
             throw new IllegalArgumentException("O campo titulo não deve conter mais de 50 caracteres");
         }
 
+        tarefa.registrarEvento("Tarefa criada");
         Tarefa tarefaSalva = tarefaRepository.save(tarefa);
         log.info("Tarefa [{}] criada com sucesso pelo usuário [{}]", tarefaSalva.getId(), idUsuario);
         return TarefaResponseDto.fromEntity(tarefaSalva);
     }
 
-    public List<TarefaResponseDto> listar(UUID  idUsuario) {
-        List<Tarefa> tarefas = tarefaRepository.findByUsuarioId(idUsuario);
-        List<TarefaResponseDto> dto = new ArrayList<>();
+    public List<TarefaResponseDto> listar(UUID  idUsuario, StatusTarefa status, Prioridade prioridade, Pageable pageable) {
+        Page<Tarefa> pagina = tarefaRepository.buscarComFiltros(idUsuario, status, prioridade,  pageable);
 
-        for (Tarefa t : tarefas) {
-            dto.add(TarefaResponseDto.fromEntity(t));
-        }
-        return dto;
+        return pagina.map(TarefaResponseDto::fromEntity).stream().toList();
     }
 
     public TarefaResponseDto buscarPorId(UUID id, UUID idUsuario) {
@@ -115,7 +112,6 @@ public class TarefaService {
         Tarefa tarefa = buscarTarefa(id);
         verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou deletar a tarefa [{}] do usuário [{}]!");
         tarefaRepository.delete(tarefa);
-        return;
     }
 
     public TarefaResponseDto iniciarTarefa(UUID id, UUID idUsuario) {
@@ -153,13 +149,38 @@ public class TarefaService {
         return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
     }
 
+    public EstatisticasResponseDto obterEstatistica(UUID idUsuario){
+        List<Tarefa> tarefas = tarefaRepository.findByUsuarioId(idUsuario);
+        long atrasadas = 0, pendentes = 0, emAndamento = 0, concluidas = 0, canceladas = 0, total = tarefas.size();
+        for(Tarefa t : tarefas){
+           switch (t.getStatus()){
+               case PENDENTE -> pendentes++;
+               case EM_ANDAMENTO -> emAndamento++;
+               case CONCLUIDA -> concluidas++;
+               case CANCELADA -> canceladas++;
+           }
+           if(t.isAtrasada()){
+               atrasadas++;
+           }
+        }
+        double percentual = total > 0 ? (double) (concluidas * 100) /total : 0.0;
+        return new EstatisticasResponseDto(total, pendentes, emAndamento, concluidas, canceladas, atrasadas, percentual);
+    }
+
+    @Scheduled(fixedRate =  60000)
+    public void verificarTarefasAtrasadas(){
+        List<Tarefa> atrasadas = tarefaRepository.buscarTarefasAtrasadas(LocalDateTime.now());
+        if(!atrasadas.isEmpty()){
+            log.warn("Atenção: Existem [{}] tarefas com prazo vencido no sistema!", atrasadas.size());
+        }
+    }
+
     private Tarefa buscarTarefa(UUID id){
-         Tarefa tarefa = tarefaRepository.findById(id)
+         return tarefaRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Tarefa [{}] não foi encontrada no banco de dados!", id);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada");
                 });
-         return tarefa;
     }
 
     private void verificarUsuario(Tarefa tarefa, UUID idUsuario, String msgErro){

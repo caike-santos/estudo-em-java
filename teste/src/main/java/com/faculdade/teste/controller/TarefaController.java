@@ -1,27 +1,20 @@
 package com.faculdade.teste.controller;
 
-import com.faculdade.teste.dto.SubtarefaRequestDto;
+import com.faculdade.teste.dto.*;
 import com.faculdade.teste.helper.TarefaModelAssembler;
 import java.util.List;
 import java.util.UUID;
 
+import com.faculdade.teste.model.Prioridade;
+import com.faculdade.teste.model.StatusTarefa;
 import com.faculdade.teste.model.Tarefa;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.faculdade.teste.dto.TarefaPatchDto;
-import com.faculdade.teste.dto.TarefaRequestDto;
-import com.faculdade.teste.dto.TarefaResponseDto;
+import org.springframework.web.bind.annotation.*;
 import com.faculdade.teste.service.TarefaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -53,9 +46,9 @@ public class TarefaController {
     }
 
     @GetMapping()
-    public ResponseEntity<CollectionModel<EntityModel<TarefaResponseDto>>> listarTarefas( HttpServletRequest request) {
+    public ResponseEntity<CollectionModel<EntityModel<TarefaResponseDto>>> listarTarefas(HttpServletRequest request, @RequestParam(required = false)StatusTarefa status, @RequestParam(required = false)Prioridade prioridade, @PageableDefault(size = 10, sort = "inicio")Pageable pageable) {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
-        List<TarefaResponseDto> tarefas = tarefaService.listar(idUsuario);
+        List<TarefaResponseDto> tarefas = tarefaService.listar(idUsuario, status, prioridade, pageable);
         return ResponseEntity.ok(tarefaModelAssembler.toCollectionModel(tarefas));
     }
 
@@ -115,5 +108,12 @@ public class TarefaController {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
         TarefaResponseDto response = tarefaService.concluirSubtarefa(id, idSubtarefa, idUsuario);
         return ResponseEntity.ok(tarefaModelAssembler.toModel(response));
+    }
+
+    @GetMapping("/estatisticas")
+    public ResponseEntity<EstatisticasResponseDto> obterEstatisticas(HttpServletRequest request){
+        UUID idUsuario = (UUID) request.getAttribute("idUsuario");
+        EstatisticasResponseDto response = tarefaService.obterEstatistica(idUsuario);
+        return ResponseEntity.ok(response);
     }
 }
