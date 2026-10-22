@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -69,6 +71,17 @@ public class ExceptionHandlerController {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<StandardErrorDto> handleObjectOptimisticLockingFailureException(ObjectOptimisticLockingFailureException e){
+        StandardErrorDto erro = new StandardErrorDto(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflito de concorrência: o registro foi alterado por outra requisição simultânea",
+                e.getMostSpecificCause().getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
     }
 
     @ExceptionHandler(Exception.class)

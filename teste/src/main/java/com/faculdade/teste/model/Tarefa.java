@@ -10,9 +10,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.hibernate.annotations.DialectOverride;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Data
 @Entity(name = "tarefas")
+@SQLDelete(sql = "UPDATE tarefas SET ativo = false WHERE id = ? AND versao = ?")
+@SQLRestriction("ativo=true")
 public class Tarefa {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -52,6 +57,15 @@ public class Tarefa {
 
     @CreationTimestamp
     private LocalDateTime dataCriada;
+
+    @Column(unique = true)
+    private String idempotencyKey;
+
+    @Version
+    private Long versao;
+
+    @Column(nullable = false)
+    private boolean ativo = true;
 
     public Tarefa(){}
 
@@ -103,8 +117,10 @@ public class Tarefa {
 
         for(Subtarefa s : this.subtarefas){
             if(s.getId().equals(idSubtarefa)){
-                s.setConcluida(true);
-                this.registrarEvento("SubTarefa concluída: " + s.getTitulo());
+                if(!s.isConcluida()){
+                    s.setConcluida(true);
+                    this.registrarEvento("SubTarefa concluída: " + s.getTitulo());
+                }
                 return;
             }
         }

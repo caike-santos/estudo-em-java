@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 
 import com.faculdade.teste.dto.*;
 import com.faculdade.teste.model.Prioridade;
-import lombok.Data;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TesteApplicationTests {
 
@@ -295,5 +296,56 @@ class TesteApplicationTests {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELADA"));
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("17. Deve garantir idempotência ao enviar duas vezes a mesma Idempotency-Key")
+    void enviarDuplicado() throws Exception {
+        String chaveIdempotencia = "chave-unica-12345";
+        TarefaRequestDto dto = new TarefaRequestDto(
+                "Tarefa Teste Idempotencia",
+                "Testando envio duplicado com mesma chave",
+                Prioridade.MEDIA,
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2)
+        );
+
+        MvcResult result = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", chaveIdempotencia)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String primeiroId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", chaveIdempotencia)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(primeiroId));
+
+
+
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("18. Deve bloquear a 6 requisição de login")
+    void requisicoesMultiplas() throws Exception{
+        LoginRequestDto loginDto = new LoginRequestDto("usuario_teste", "senha123456");
+        for(int i = 0; i<5; i++){
+             mockMvc.perform(post("/usuarios/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(loginDto)));
+        }
+        mockMvc.perform(post("/usuarios/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isTooManyRequests());
     }
 }

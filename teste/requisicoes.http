@@ -49,9 +49,11 @@ Content-Type: application/json
   "senha": "novaSenha123"
 }
 
-### 5. Cadastrar Nova Tarefa (PROTEGIDO COM JWT)
+### 5. Cadastrar Nova Tarefa (PROTEGIDO COM JWT + IDEMPOTÊNCIA + CORRELATION ID)
 POST {{baseUrl}}/tarefas
 Authorization: Bearer {{token}}
+Idempotency-Key: chave-unica-12345
+X-Correlation-Id: req-teste-001
 Content-Type: application/json
 
 {

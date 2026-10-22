@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.faculdade.teste.model.Prioridade;
 import com.faculdade.teste.model.StatusTarefa;
 import com.faculdade.teste.model.Tarefa;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.CollectionModel;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import com.faculdade.teste.service.TarefaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/tarefas")
@@ -32,9 +34,9 @@ public class TarefaController {
 
     @PostMapping
     public ResponseEntity<EntityModel<TarefaResponseDto>> cadastrarTarefa(@RequestBody @Valid TarefaRequestDto dto,
-            HttpServletRequest request) {
+            HttpServletRequest request, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
         UUID idUsuario = (UUID) request.getAttribute("idUsuario");
-        TarefaResponseDto response = tarefaService.cadastrar(dto, idUsuario);
+        TarefaResponseDto response = tarefaService.cadastrar(dto, idUsuario, idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED).body(tarefaModelAssembler.toModel(response));
     }
 

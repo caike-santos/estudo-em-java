@@ -24,6 +24,6 @@ public record TarefaResponseDto(
     List<String> historico
 ) {
     public static TarefaResponseDto fromEntity(Tarefa tarefa){
-        return  new TarefaResponseDto(tarefa.getId(), tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getPrioridade(), tarefa.getStatus(), tarefa.getInicio(), tarefa.getTermino(), tarefa.getConclusao(), tarefa.getUsuario().getId(), tarefa.getDataCriada(), tarefa.getSubtarefas().stream().map(SubtarefaResponseDto::fromEntity).toList(), tarefa.getHistorico());
+        return  new TarefaResponseDto(tarefa.getId(), tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getPrioridade(), tarefa.getStatus(), tarefa.getInicio(), tarefa.getTermino(), tarefa.getConclusao(), tarefa.getUsuario().getId(), tarefa.getDataCriada(), tarefa.getSubtarefas().stream().map(SubtarefaResponseDto::fromEntity).toList(), List.copyOf(tarefa.getHistorico()));
     }
 }

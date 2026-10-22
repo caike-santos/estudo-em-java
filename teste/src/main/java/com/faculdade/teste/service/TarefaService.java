@@ -9,11 +9,13 @@ import com.faculdade.teste.dto.*;
 import com.faculdade.teste.model.Prioridade;
 import com.faculdade.teste.model.StatusTarefa;
 import com.faculdade.teste.model.Usuario;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.faculdade.teste.model.Tarefa;
 import com.faculdade.teste.repository.TarefaRepository;
@@ -22,6 +24,7 @@ import com.faculdade.teste.utils.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+@Transactional
 @Slf4j
 @Service
 public class TarefaService {
@@ -33,8 +36,14 @@ public class TarefaService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public TarefaResponseDto cadastrar(TarefaRequestDto dto, UUID idUsuario) {
-
+    public TarefaResponseDto cadastrar(TarefaRequestDto dto, UUID idUsuario, String idempotencyKey) {
+        if(idempotencyKey != null && !idempotencyKey.isBlank()){
+            var tarefaExistente = tarefaRepository.findByIdempotencyKeyAndUsuarioId(idempotencyKey, idUsuario);
+            if(tarefaExistente.isPresent()){
+                log.info("Requisição idempotente detectada para a chave [{}]", idempotencyKey);
+                return TarefaResponseDto.fromEntity(tarefaExistente.get());
+            }
+        }
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao existe"));
 
@@ -46,6 +55,7 @@ public class TarefaService {
         tarefa.setPrioridade(dto.prioridade() != null ? dto.prioridade() : Prioridade.MEDIA);
         tarefa.setInicio(dto.inicio());
         tarefa.setTermino(dto.termino());
+        tarefa.setIdempotencyKey(idempotencyKey);
 
         if (tarefaRepository.findByTituloAndUsuarioId(tarefa.getTitulo(), idUsuario) != null) {
             throw new IllegalArgumentException("Titulo já existente");
@@ -70,12 +80,14 @@ public class TarefaService {
         return TarefaResponseDto.fromEntity(tarefaSalva);
     }
 
+    @Transactional(readOnly = true)
     public List<TarefaResponseDto> listar(UUID  idUsuario, StatusTarefa status, Prioridade prioridade, Pageable pageable) {
         Page<Tarefa> pagina = tarefaRepository.buscarComFiltros(idUsuario, status, prioridade,  pageable);
 
         return pagina.map(TarefaResponseDto::fromEntity).stream().toList();
     }
 
+    @Transactional(readOnly = true)
     public TarefaResponseDto buscarPorId(UUID id, UUID idUsuario) {
         Tarefa tarefa = buscarTarefa(id);
         verificarUsuario(tarefa, idUsuario, "Usuário [{}] tentou ler a tarefa [{}] pertencente ao usuário [{}]!");
@@ -149,6 +161,7 @@ public class TarefaService {
         return TarefaResponseDto.fromEntity(tarefaRepository.save(tarefa));
     }
 
+    @Transactional(readOnly = true)
     public EstatisticasResponseDto obterEstatistica(UUID idUsuario){
         List<Tarefa> tarefas = tarefaRepository.findByUsuarioId(idUsuario);
         long atrasadas = 0, pendentes = 0, emAndamento = 0, concluidas = 0, canceladas = 0, total = tarefas.size();
@@ -167,6 +180,7 @@ public class TarefaService {
         return new EstatisticasResponseDto(total, pendentes, emAndamento, concluidas, canceladas, atrasadas, percentual);
     }
 
+    @Transactional(readOnly = true)
     @Scheduled(fixedRate =  60000)
     public void verificarTarefasAtrasadas(){
         List<Tarefa> atrasadas = tarefaRepository.buscarTarefasAtrasadas(LocalDateTime.now());

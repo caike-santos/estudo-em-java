@@ -45,4 +45,6 @@ public interface TarefaRepository extends JpaRepository<Tarefa, UUID> {
             AND t.termino < :agora
 """)
     List<Tarefa> buscarTarefasAtrasadas(@Param("agora")LocalDateTime agora);
+
+    Optional<Tarefa> findByIdempotencyKeyAndUsuarioId(String idempotencyKey, UUID usuarioId);
 }
