@@ -32,7 +32,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByNome(dto.nome());
 
         if (usuario == null || !passwordEncoder.matches(dto.senha(), usuario.getSenha())) {
-            log.warn("\"Falha no login: credenciais inválidas para o usuário [{}]", dto.nome());
+            log.warn("Falha no login: credenciais inválidas para o usuário [{}]", dto.nome());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário ou senha incorretos");
         }
 
